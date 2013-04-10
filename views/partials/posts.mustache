@@ -1,0 +1,19 @@
+<section>
+	{{#posts}}
+		<article class="post" id="post-{{ID}}">
+			<h1>
+				<a href="{{permalink}}">{{post_title}}</a>
+			</h1>
+			<div class="post-body">{{{post_content}}}</div>
+			<footer class="post-meta clearfix">
+				<small>Written on {{nice_date}}</small>
+				<div class="link-to-comments">
+					<a href="{{permalink}}#comments">
+						<i class="icon-comments" aria-hidden="true"></i>
+						{{comment_count}}
+					</a>
+				</div>
+			</footer>
+		</article>
+	{{/posts}}
+</section>

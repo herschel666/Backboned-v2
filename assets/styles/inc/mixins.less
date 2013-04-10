@@ -1,0 +1,30 @@
+.transition (@property: all, @duration: .2s, @type: linear, @delay: 0) {
+	-webkit-transition: @property @duration @type;
+	-moz-transition: @property @duration @type;
+	-ms-transition: @property @duration @type;
+	-o-transition: @property @duration @type;
+	transition: @property @duration @type;
+	-webkit-transition-delay: @delay;
+	-moz-transition-delay: @delay;
+	-ms-transition-delay: @delay;
+	-o-transition-delay: @delay;
+	transition-delay: @delay;
+	}
+
+.opacity (@opacity: .5) {
+	-moz-opacity: @opacity;
+	-khtml-opacity: @opacity;
+	-webkit-opacity: @opacity;
+	opacity: @opacity;
+	@opperc: @opacity * 100;
+	-ms-filter: ~"progid:DXImageTransform.Microsoft.Alpha(opacity=@{opperc})";
+	filter: ~"alpha(opacity=@{opperc})";
+	}
+
+.transform (...) {
+	-webkit-transform: @arguments;
+	-moz-transform: @arguments;
+	-ms-transform: @arguments;
+	-o-transform: @arguments;
+	transform: @arguments;
+	}

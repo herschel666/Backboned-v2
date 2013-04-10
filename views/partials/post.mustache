@@ -1,0 +1,19 @@
+<section class="post-single">
+	<article class="post" id="post-{{ID}}">
+		<h1>{{post_title}}</h1>
+		<div class="post-body">{{{post_content}}}</div>
+		<footer class="post-meta">
+			<div class="author-date">
+				<small>Written on {{nice_date}} by {{author.display_name}}</small>
+			</div>
+			<div class="categories">
+				<small>Categories:</small>
+				{{# post_cats}}
+					<small class="category-link category-{{term_id}}">
+						<i class="icon-tag" aria-hidden="true"></i>
+						<a href="{{slug}}">{{name}}</a>
+					</small>
+				{{/post_cats}}
+		</footer>
+	</article>
+</section>

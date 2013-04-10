@@ -1,0 +1,19 @@
+<section class="comments">
+	<h2 class="comment-heading">Comments for this post &hellip;</h2>
+	{{#comments}}
+		<article class="comment" id="comment-{{comment_ID}}">
+			{{# comment_author_url}}
+				<h3>
+					<a href="{{comment_author_url}}">{{comment_author}}</a>
+				</h3>
+			{{/ comment_author_url}}
+			{{^ comment_author_url}}
+				<h3>{{comment_author}}</h3>
+			{{/ comment_author_url}}
+			<div class="comment-body">{{{comment_content}}}</div>
+			<footer class="comment-meta">
+				<small>Written {{nice_date}}</small>
+			</footer>
+		</article>
+	{{/comments}}
+</section>

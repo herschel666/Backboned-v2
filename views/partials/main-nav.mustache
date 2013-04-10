@@ -1,0 +1,9 @@
+<nav>
+	<ul class="clearfix">
+		{{#nav-items}}
+			<li {{# current}}class="current"{{/current}}>
+				<a href="{{slug}}" class="light-link">{{title}}</a>
+			</li>
+		{{/nav-items}}
+	</ul>
+</nav>

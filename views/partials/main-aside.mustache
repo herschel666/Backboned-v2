@@ -1,0 +1,42 @@
+<aside>
+
+	<section class="categories-outer">
+		<h1>Categories</h1>
+		<nav class="categories">
+			<ul>
+				{{#categories}}
+					<li>
+						<a href="{{slug}}">{{title}}</a> ({{count}})
+					</li>
+				{{/categories}}
+			<ul>
+		</nav>
+	</section>
+
+	<section class="archive-outer">
+		<h1>Archive</h1>
+		<nav class="archive">
+			<ul>
+				{{#archives}}
+					<li>
+						<a href="{{slug}}">{{title}}</a> ({{count}})
+					</li>
+				{{/archives}}
+			<ul>
+		</nav>
+	</section>
+
+	<section class="bookmarks-outer">
+		<h1>Bookmarks</h1>
+		<nav class="bookmarks">
+			<ul>
+				{{#bookmarks}}
+					<li>
+						<a href="{{slug}}">{{title}}</a>
+					</li>
+				{{/bookmarks}}
+			<ul>
+		</nav>
+	</section>
+
+</aside>

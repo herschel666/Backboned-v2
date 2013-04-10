@@ -1,0 +1,39 @@
+{{# commentform}}
+	<form method="post" class="comment-form-inner">
+		<div class="error-message align-center hidden">Please fill out the highlighted fields.</div>
+		<fieldset>
+
+			{{# user_name}}
+				<p class="user-logged-in">You're logged in as {{user_name}} (<a href="{{logout_url}}" class="logout">Logout</a>)</p>
+			{{/ user_name}}
+			
+			{{^ user_name}}
+				<div class="form-row">
+					<label for="author">Name <small>(required)</small></label>
+					<input type="text" name="author" id="author" tabindex="1" aria-required="true" required />
+				</div>
+				<div class="form-row">
+					<label for="email">Email <small>(required)</small></label>
+					<input type="email" name="email" id="email" tabindex="2" aria-required="true" required />
+				</div>
+				<div class="form-row">
+					<label for="url">Website</label>
+					<input type="url" name="url" id="url" tabindex="3" />
+				</div>
+			{{/ user_name}}
+			
+			<div class="form-row">
+				<label for="comment">Your comment</label>
+				<textarea name="comment" id="comment" class="text-area" cols="50" rows="10" tabindex="4"></textarea>
+			</div>
+			<div class="form-row">
+				<button name="submit" type="submit" class="btn" tabindex="5">Submit</button>
+			</div>
+			
+			<input type="hidden" name="comment_post_ID" value="{{post_id}}" id="comment_post_ID" />
+			<input type="hidden" name="comment_parent" id="comment_parent" value="0" />
+			<input type="hidden" name="redirect_to" id="redirect_to" value="{{post_url}}" />
+		
+		</fieldset>
+	</form>
+{{/ commentform}}
