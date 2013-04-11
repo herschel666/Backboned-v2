@@ -160,13 +160,19 @@ h1, h2, h3, h4, h5, h6, small {
 .content-inserted .posts-outer {
 	.opacity(.2);
 	-webkit-transform: translateY(10/16em) rotateX(3deg) scale(.95, 1);
-	-webkit-filter: blur(2px);
+	-moz-transform: translateY(10/16em) rotateX(3deg) scale(.95, 1);
+	-ms-transform: translateY(10/16em) rotateX(3deg) scale(.95, 1);
+	-o-transform: translateY(10/16em) rotateX(3deg) scale(.95, 1);
+	transform: translateY(10/16em) rotateX(3deg) scale(.95, 1);
 	}
 
 .content-ready .posts-outer {
 	.opacity(1);
 	-webkit-transform: translateY(0) rotateX(0) scale(1, 1);
-	-webkit-filter: blur(0);
+	-moz-transform: translateY(0) rotateX(0) scale(1, 1);
+	-ms-transform: translateY(0) rotateX(0) scale(1, 1);
+	-o-transform: translateY(0) rotateX(0) scale(1, 1);
+	transform: translateY(0) rotateX(0) scale(1, 1);
 	.transition(all, .15s, ease-out);
 	}
 
