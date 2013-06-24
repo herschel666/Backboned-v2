@@ -120,10 +120,6 @@ class Backboned {
 			$pagelinks['next_link'] = $next_link;
 		}
 
-		$link = get_next_posts_link('');
-		var_dump($link);
-		exit(0);
-
 		return $pagelinks;
 
 	}
