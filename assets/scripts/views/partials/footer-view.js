@@ -3,6 +3,9 @@ define([
 	'mustache'
 ], function (Backbone, Mustache) {
 
+	/*
+	 * View for the footer.
+	**/
 	return Backbone.View.extend({
 
 		tmpl : $('#footer-tmpl').html(),

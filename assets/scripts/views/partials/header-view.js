@@ -3,6 +3,9 @@ define([
 	'mustache'
 ], function (Backbone, Mustache) {
 
+	/*
+	 * View for the mighty header!!1
+	**/
 	return Backbone.View.extend({
 
 		tmpl : $('#header-tmpl').html(),

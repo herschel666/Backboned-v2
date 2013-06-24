@@ -1,5 +1,8 @@
 <?php
 
+/*
+ * Wordpress Model Class
+**/
 class WP_Model {
 
 	private $user;
@@ -12,6 +15,9 @@ class WP_Model {
 
 	}
 
+	/*
+	 * Auto-<p> the passed content.
+	**/
 	private function autop(&$content, $key, $eference) {
 
 		if ( $key != reference ) {
@@ -74,7 +80,7 @@ class WP_Model {
 			}
 
 		}
-		
+
 		return $page_array;
 
 	}
@@ -145,7 +151,7 @@ class WP_Model {
 
 		$bookmarks = get_bookmarks();
 		$bookmark_array = array();
-		
+
 		if ( !empty($bookmarks) ) {
 
 			foreach( $bookmarks as $bookmark ) {
@@ -174,14 +180,14 @@ class WP_Model {
 		);
 
 	}
-	
+
 	/*
 	 * Total post count
-	**/	
+	**/
 	private function __get_post_count() {
 
 		$count_posts = wp_count_posts();
-		
+
 		return $count_posts->publish;
 
 	}
@@ -258,7 +264,7 @@ class WP_Model {
 			);
 
 		}
-		
+
 		return $result;
 
 	}
@@ -285,7 +291,7 @@ class WP_Model {
 	}
 
 	/*
-	 * Comments for current post or for a post specified by ID
+	 * Comments for the current post or for a post specified by ID
 	**/
 	private function __get_comments($id = null) {
 
@@ -316,7 +322,7 @@ class WP_Model {
 	}
 
 	/*
-	 * Categories for current post or for a post specified by ID
+	 * Categories for the current post or for a post specified by ID
 	**/
 	private function __get_post_cats($id = null) {
 
@@ -353,7 +359,7 @@ class WP_Model {
 
 		$post->post_content = wpautop($post->post_content);
 		$post->nice_date = date(get_option('date_format'), strtotime($post->post_date));
-		
+
 		return array(
 			'ID' => $post->ID,
 			'post_title' => $post->post_title,

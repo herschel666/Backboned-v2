@@ -4,6 +4,10 @@ define([
 	'mustache'
 ], function (app, Backbone, Mustache) {
 
+	/*
+	 * View for the main-navigation.
+	 * Handles navigation-highlighting.
+	**/
 	return Backbone.View.extend({
 
 		tmpl : $('#navigation-tmpl').html(),
@@ -14,13 +18,20 @@ define([
 			'click a' : 'toggleCurrentClass'
 		},
 
+		/*
+		 * Rendering and subscribing to the event emitted
+		 * after each page-change by the wp-collection.
+		**/
 		initialize : function initialize() {
 
-			app.on('UI.removeCurrentClass', this.removeCurrentClass, this);
+			app.on('UI.handleCurrentClass', this.handleCurrentClass, this);
 			this.render();
 
 		},
 
+		/*
+		 * The actual rendering.
+		**/
 		render : function render() {
 
 			return this.$el.html(Mustache.render(this.tmpl, {
@@ -29,6 +40,9 @@ define([
 
 		},
 
+		/*
+		 * Toggling the navigation-highlighting.
+		**/
 		toggleCurrentClass : function toggleCurrentClass(evnt) {
 
 			$(evnt.currentTarget.parentNode)
@@ -38,7 +52,15 @@ define([
 
 		},
 
-		removeCurrentClass : function removeCurrentClass() {
+		/*
+		 * Removing the navigation-highlighting, if the current page
+		 * is not a static wordpress-page.
+		**/
+		handleCurrentClass : function handleCurrentClass(type) {
+
+			if ( type === 'page') {
+				return;
+			}
 
 			this
 				.$('li')

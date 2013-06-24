@@ -4,6 +4,9 @@ define([
 	'mustache'
 ], function (app, Backbone, Mustache) {
 
+	/*
+	 * Viw for the pagination-links.
+	**/
 	return Backbone.View.extend({
 
 		tmpl : $('#page-links-tmpl').html(),

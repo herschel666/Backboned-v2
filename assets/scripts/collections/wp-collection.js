@@ -1,11 +1,43 @@
 define([
 	'app',
 	'backbone',
-	'views'
-], function (app, Backbone, Views) {
+	'views/base-view',
+	'partial-views'
+], function (app, Backbone, BaseView, Partials) {
 
+	/*
+	 * The main-collection for fetching all the wordpress
+	 * content and assigning it to the corresonding view.
+	**/
 	return Backbone.Collection.extend({
 
+		/*
+		 * Object holding infos about the frame-views.
+		**/
+		frameViews: {
+			Header: '#main-header',
+			Navigation: '#main-nav',
+			Aside: '#main-aside',
+			Footer: '#main-footer'
+		},
+
+		/*
+		 * Object holding the template-selectors
+		 * for each main-content-type (loop,
+		 * single, page and error).
+		**/
+		mainTemplates: {
+			loop: $('#loop-tmpl').html(),
+			error: $('#error-tmpl').html(),
+			page: $('#page-tmpl').html(),
+			single: $('#single-tmpl').html()
+		},
+
+		/*
+		 * Inserting the frame-views like footer, header, etc. and
+		 * binding the assignViews-method to the add-event of
+		 * the collection.
+		**/
 		initialize : function initialize() {
 
 			this.insertFrameViews();
@@ -13,66 +45,130 @@ define([
 
 		},
 
+		/*
+		 * Calling all the methods to handle this big chunk
+		 * of loaded data from the wordpress-system.
+		**/
 		assignViews : function assignView() {
 
 			var data = this.at(0),
-				type = data.get('type'),
-				pagelinks = data.get('pagelinks'),
-				comments = data.get('comments'),
-				commentform = data.get('commentform');
+				type = data.get('type');
 
-			new Views[type]({
-				el : '#posts',
-				content : data.get('content')
-			});
+			this
+				.applyMainView(data, type)
+				.removeCurrentClass(type)
+				.handlePageLinks(data)
+				.handleComments(data)
+				.handleCommentForm(data);
 
-			if ( type !== 'page') {
-				app.trigger('UI.removeCurrentClass');
-			}
+		},
 
-			if ( pagelinks ) {
-				new Views.partials.PageLinks({
-					el : '#page-links',
-					content : pagelinks
+		/*
+		 * Inserting the frame-views.
+		**/
+		insertFrameViews : function insertFrameViews() {
+
+			for ( frameView in this.frameViews ) {
+				new Partials[frameView]({
+					el : this.frameViews[frameView]
 				});
-			} else {
-				app.trigger('UI.removePageLinks');
-			}
-
-			if ( comments && comments.length ) {
-				new Views.partials.Comments({
-					el : '#comments-list',
-					content : comments
-				});
-			} else {
-				app.trigger('UI.removeComments');
-			}
-
-			if ( commentform ) {
-				new Views.partials.CommentForm({
-					el : '#comment-form',
-					content : commentform
-				});
-			} else {
-				app.trigger('UI.removeCommentForm');
 			}
 
 		},
 
-		insertFrameViews : function insertFrameViews() {
+		/*
+		 * Inserting the main-content: a or several blogposts
+		 * or a static wordpress-page.
+		**/
+		applyMainView: function applyMainView(data, type) {
 
-			new Views.partials.Header({
-				el : '#main-header'
+			(new BaseView({
+				el : '#posts',
+				tmpl: this.mainTemplates[type],
+				content : /^(page|single)$/.test(type)
+					? data.get('content')
+					: {posts: data.get('content')}
+			})).render();
+
+			return this;
+
+		},
+
+		/*
+		 * Emitting event for handling the navigation-highlighting.
+		**/
+		removeCurrentClass: function removeCurrentClass(type) {
+
+			app.trigger('UI.handleCurrentClass', type);
+
+			return this;
+
+		},
+
+		/*
+		 * Checking if a pagination is needed. Inserting the corresponding
+		 view or emitting event for removing the current pagination-view.
+		**/
+		handlePageLinks: function handlePageLinks(data) {
+
+			var pagelinks = data.get('pagelinks');
+
+			if ( !pagelinks ) {
+				app.trigger('UI.removePageLinks');
+				return this;
+			}
+
+			new Partials.PageLinks({
+				el : '#page-links',
+				content : pagelinks
 			});
-			new Views.partials.Navigation({
-				el : '#main-nav'
+
+			return this;
+
+		},
+
+		/*
+		 * Checking if the loaded contains comments. Insert comment-view
+		 * or remove currently existing comment-view if the data
+		 * contains no comment-information.
+		**/
+		handleComments: function handleComments(data) {
+
+			var comments = data.get('comments');
+
+			if ( !comments || !comments.length ) {
+				app.trigger('UI.removeComments');
+				return this;
+			}
+
+			new Partials.Comments({
+				el : '#comments-list',
+				content : comments
 			});
-			new Views.partials.Aside({
-				el : '#main-aside'
+
+			return this;
+
+		},
+
+		/*
+		 * Inserting commentform-view, if it's needed. Otherwise removing the
+		 * currently existing commentform.
+		**/
+		handleCommentForm: function handleCommentForm(data) {
+
+			var commentform = data.get('commentform');
+
+			if ( !commentform ) {
+				app.trigger('UI.removeCommentForm');
+				return this;
+			}
+
+			new Partials.CommentForm({
+				el : '#comment-form',
+				content : commentform
 			});
-			new Views.partials.Footer({
-				el : '#main-footer'
-			});
+
+			return this;
 
 		}
 

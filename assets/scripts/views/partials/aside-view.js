@@ -3,6 +3,9 @@ define([
 	'mustache'
 ], function (Backbone, Mustache) {
 
+	/*
+	 * View for the main-aside.
+	**/
 	return Backbone.View.extend({
 
 		tmpl : $('#aside-tmpl').html(),

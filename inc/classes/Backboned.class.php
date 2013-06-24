@@ -6,6 +6,9 @@ require_once('WP_Model.class.php');
 require_once($inc . '/libs/Mustache/Autoloader.php');
 Mustache_Autoloader::register();
 
+/*
+ * Backboned Controller
+**/
 class Backboned {
 
 	private $root;
@@ -57,7 +60,7 @@ class Backboned {
 		}
 
 		return 'standard';
-	
+
 	}
 
 	public function content($type = 'loop') {
@@ -91,6 +94,8 @@ class Backboned {
 
 	/*
 	 * Loop pagination
+	 *
+	 * @todo: pagelinks for category pages
 	**/
 	private function __get_pagelinks() {
 
@@ -114,6 +119,10 @@ class Backboned {
 			$next_link = preg_replace('/(\??_escaped_fragment_)/', '', $slug[1]);
 			$pagelinks['next_link'] = $next_link;
 		}
+
+		$link = get_next_posts_link('');
+		var_dump($link);
+		exit(0);
 
 		return $pagelinks;
 
@@ -148,7 +157,7 @@ class Backboned {
 
 		$layout = $this->mustache->loadTemplate('404');
 		echo $layout->render($content);
-	
+
 	}
 
 	/*
@@ -186,6 +195,9 @@ class Backboned {
 
 	}
 
+	/*
+	 * Generating the content for a single post.
+	**/
 	private function __generate_post() {
 
 		$request_type = $this->request_type();
@@ -224,6 +236,9 @@ class Backboned {
 
 	}
 
+	/*
+	 * Generating the content for a static page.
+	**/
 	private function __generate_page() {
 
 		$request_type = $this->request_type();
@@ -262,7 +277,7 @@ class Backboned {
 	}
 
 	/*
-	 * Create an JS-Object with all relevant data
+	 * Create a JS-Object with all relevant data
 	**/
 	public function __get_js_variables() {
 

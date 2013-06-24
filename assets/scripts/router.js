@@ -1,27 +1,50 @@
 define([
 	'app',
 	'backbone',
-	'collections/wp-collection'
-], function (app, backbone, wpCollection) {
+	'collections/wp-collection',
+	'views/body-view'
+], function (app, backbone, wpCollection, BodyView) {
 
+	var bodyView = new BodyView({
+		el: document.body
+	});
+
+	/*
+	 * Main-Router - takes the URI from the pushState-Event
+	 * and passes it to the main-collection.
+	 *
+	 * So actually there's no noteworthy routing
+	 * happening here … o.O
+	**/
 	return Backbone.Router.extend({
 
+		/*
+		 * One route to rule them all! \m/
+		**/
 		routes : {
 			'*path' : 'delegateRequest'
 		},
 
-		$body : $(document.body),
+		/*
+		 * Instatiating the one and only main-collection.
+		**/
+		collection : new wpCollection({
+			reset : true,
+			error: function () {
+				console.debug(arguments);
+			}
+		}),
 
-		collection : new wpCollection({reset : true}),
-
+		/*
+		 * Scrolling to top, emitting the event for handling
+		 * the page-transition-CSS-classes and rearming the
+		 * main-collection.
+		**/
 		delegateRequest : function delegateRequest(_path) {
 
 			window.scrollTo(0, 1);
 
-			this
-				.$body
-				.removeClass('content-ready')
-				.addClass('request-pending');
+			bodyView.trigger('UI.mainViewPending');
 
 			this.collection.url = _path || '/';
 			this.collection.fetch({
@@ -30,25 +53,12 @@ define([
 
 		},
 
+		/*
+		 * Secend event-emitting to signalize that the
+		 * loading-process is finished.
+		**/
 		applyBodyClass : function () {
-
-			this
-				.$body
-				.removeClass('request-pending')
-				.addClass('content-inserted');
-
-			_.delay(function (that) {
-				that
-					.$body
-					.addClass('content-ready');
-			}, 100, this);
-
-			_.delay(function (that) {
-				that
-					.$body
-					.removeClass('content-inserted');
-			}, 900, this);
-
+			bodyView.trigger('UI.mainViewReady');
 		}
 
 	});

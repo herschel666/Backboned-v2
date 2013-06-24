@@ -4,6 +4,9 @@ define([
 	'mustache'
 ], function (app, Backbone, Mustache) {
 
+	/*
+	 * View for the comment-form.
+	**/
 	return Backbone.View.extend({
 
 		tmpl : $('#commentform-tmpl').html(),
@@ -21,6 +24,9 @@ define([
 
 		},
 
+		/*
+		 * Delegating the submit-event and rendering the form.
+		**/
 		render : function render() {
 
 			return this
@@ -33,6 +39,9 @@ define([
 
 		},
 
+		/*
+		 * Undelegating the submit-event and removing the form.
+		**/
 		removeForm : function removeForm() {
 
 			this
@@ -43,14 +52,25 @@ define([
 
 		},
 
+		/*
+		 * Method for validating an email-address.
+		 * The regular expression is an ugly piece
+		 * of stinking horse shit.
+		 *
+		 * @todo EK: try out /^.+@.+\..+$/ or something similar.
+		**/
 		validateEmail : function validateEmail(addr) {
 
 			var re = new RegExp('[a-z0-9!#$%&\'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&\'*+/=?^_`{|}~-]+)*@(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?');
 
 			return re.test(addr);
 
-		}, 
+		},
 
+		/*
+		 * Validating the submitted form data and
+		 * adding/removing error highlight classes.
+		**/
 		validateForm : function validateForm(evnt) {
 
 			var elem = evnt.currentTarget,
@@ -68,17 +88,17 @@ define([
 				? 'addClass'
 				: 'removeClass'
 			]('error');
-			
+
 			$emailParent[!emailValid
 				? 'addClass'
 				: 'removeClass'
 			]('error');
-			
+
 			$commentParent[!commentValid
 				? 'addClass'
 				: 'removeClass'
 			]('error');
-			
+
 			$elem[!emailValid || !authorValid || !commentValid
 				? 'addClass'
 				: 'removeClass'
@@ -94,12 +114,19 @@ define([
 
 		},
 
+		/*
+		 * Asynchronously sending the form data to the wordpress system.
+		**/
 		submitForm : function submitForm(formData, formElem) {
 
 			$.post('wp-comments-post.php', formData, $.proxy(this.handleFormResponse, this, formElem));
 
 		},
 
+		/*
+		 * Error message or - if nothing went wrong - resetting the form
+		 * and append the new comment.
+		**/
 		handleFormResponse : function handleFormResponse(formElem, resp) {
 
 			if ( !resp.hasOwnProperty('comments') ) {

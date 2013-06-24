@@ -4,6 +4,9 @@ define([
 	'mustache'
 ], function (app, Backbone, Mustache, ContentView) {
 
+	/*
+	 * View for the comments list.
+	**/
 	return Backbone.View.extend({
 
 		tmpl : $('#comments-tmpl').html(),
@@ -16,6 +19,9 @@ define([
 
 		},
 
+		/*
+		 * Rendering and appending the comments list.
+		**/
 		render : function render() {
 
 			var that = this;
@@ -31,6 +37,9 @@ define([
 
 		},
 
+		/*
+		 * Removing the view.
+		**/
 		removeComments : function removeComments() {
 
 			this
@@ -39,6 +48,9 @@ define([
 
 		},
 
+		/*
+		 * Adding a single comment to the content object.
+		**/
 		addComment : function addComment(comments) {
 
 			this.options.content = comments;
