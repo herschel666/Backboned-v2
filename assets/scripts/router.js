@@ -29,10 +29,7 @@ define([
 		 * Instatiating the one and only main-collection.
 		**/
 		collection : new wpCollection({
-			reset : true,
-			error: function () {
-				console.debug(arguments);
-			}
+			reset : true
 		}),
 
 		/*
@@ -42,13 +39,19 @@ define([
 		**/
 		delegateRequest : function delegateRequest(_path) {
 
+			var that = this;
+
 			window.scrollTo(0, 1);
 
 			bodyView.trigger('UI.mainViewPending');
 
 			this.collection.url = _path || '/';
 			this.collection.fetch({
-				success : $.proxy(this.applyBodyClass, this)
+				success : $.proxy(this.applyBodyClass, this),
+				error: function () {
+					that.collection.assignViews.apply(that.collection, arguments);
+					that.applyBodyClass.call(that);
+				}
 			});
 
 		},

@@ -49,10 +49,15 @@ define([
 		 * Calling all the methods to handle this big chunk
 		 * of loaded data from the wordpress-system.
 		**/
-		assignViews : function assignView() {
+		assignViews : function assignView(model, obj, resp) {
 
-			var data = this.at(0),
-				type = data.get('type');
+			var data = resp.xhr.status === 404
+				? this._handleErrorContent(resp.xhr.responseText)
+				: this.at(0);
+
+			var type = resp.xhr.status === 404
+				? 'error'
+				: data.get('type');
 
 			this
 				.applyMainView(data, type)
@@ -85,9 +90,9 @@ define([
 			(new BaseView({
 				el : '#posts',
 				tmpl: this.mainTemplates[type],
-				content : /^(page|single)$/.test(type)
-					? data.get('content')
-					: {posts: data.get('content')}
+				content : /^(loop)$/.test(type)
+					? {posts: data.get('content')}
+					: data.get('content')
 			})).render();
 
 			return this;
@@ -170,6 +175,18 @@ define([
 
 			return this;
 
+		},
+
+		/*
+		 * Parsing the 404 error message and return it wrapped into
+		 * a getter-function, so it doesn't break the flow.
+		**/
+		_handleErrorContent: function _handleErrorContent(resp) {
+			return {
+				get: function get(type) {
+					return /^(content)$/.test(type) && $.parseJSON(resp).content;
+				}
+			};
 		}
 
 	});

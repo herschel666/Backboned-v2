@@ -99,7 +99,7 @@ class WP_Model {
 
 				array_push($category_array, array(
 					'title' => $category->name,
-					'slug' => '/' . $category->slug . '/',
+					'slug' => '/category/' . $category->slug . '/',
 					'cat_id' => $category->term_id,
 					'count' => $category->count
 				));

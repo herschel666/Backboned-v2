@@ -1,6 +1,6 @@
 <?php
 
-require_once('inc/classes/Backboned.class.php');
+require_once('inc/classes/BB-Controller.class.php');
 
 /*
  * Set the content width based on the theme's design and stylesheet.
@@ -8,7 +8,7 @@ require_once('inc/classes/Backboned.class.php');
 if ( ! isset( $content_width ) ) {
 	$content_width = 570;
 }
-	
+
 /*
  * Removing annoying stuff from the HTML-head
 **/
@@ -23,6 +23,32 @@ function bb_remove_annoying_stuff() {
 	wp_deregister_script('l10n');
 }
 add_action('init', 'bb_remove_annoying_stuff');
+
+/*
+ * Setting the body-class
+**/
+function bb_body_class() {
+	do_action('bb_body_class');
+}
+
+/*
+ * If it's not a search-engine-crawler visiting the site,
+ * the right body-class is set to hide the empty
+ * content-element.
+**/
+function bb_set_body_class() {
+
+	$inst = new Backboned();
+
+	if ( $inst->request_type() != 'standard' ) {
+		return;
+	}
+
+	echo ' class="request-pending"';
+
+}
+
+add_action('bb_body_class', 'bb_set_body_class', 1);
 
 /*
  * Registering hooks

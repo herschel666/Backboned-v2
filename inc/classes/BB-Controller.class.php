@@ -2,7 +2,7 @@
 
 $inc = dirname(dirname(__FILE__));
 
-require_once('WP_Model.class.php');
+require_once('BB-Model.class.php');
 require_once($inc . '/libs/Mustache/Autoloader.php');
 Mustache_Autoloader::register();
 
@@ -305,7 +305,7 @@ class Backboned {
 		$str = '<script src="' . get_bloginfo('template_url');
 		$str .= '/assets/scripts/vendor/require-2.1.5.min.js"';
 		$str .= ' data-main="' . get_bloginfo('template_url');
-		$str .= '/assets/scripts/config.js"';
+		$str .= '/assets/scripts/config"';
 		$str .= '></script>';
 
 		return $str;
@@ -327,6 +327,10 @@ class Backboned {
 
 		$str .= '<script type="text/x-template" id="single-tmpl">';
 		$str .= str_replace(array("\n", "\t", "\r"), '', file_get_contents($this->root . '/views/partials/post.mustache'));
+		$str .= '</script>';
+
+		$str .= '<script type="text/x-template" id="error-tmpl">';
+		$str .= str_replace(array("\n", "\t", "\r"), '', file_get_contents($this->root . '/views/partials/error.mustache'));
 		$str .= '</script>';
 
 		$str .= '<script type="text/x-template" id="comments-tmpl">';
