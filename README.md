@@ -1,14 +1,14 @@
 # Backboned v2
 
-Backboned v2 is the follow-up to [Backboned](https://github.com/herschel666/Backboned) — an AJAX-Wordpress-theme powered by Backbone.js. I decided to create a new repository for this one, as the differences in the concept and the code are to large.
+Backboned v2 is the follow-up to [Backboned](https://github.com/herschel666/Backboned) — an AJAX-Wordpress-theme powered by Backbone.js. I decided to create a new repository for this one, as the differences in the concept and the code are too large.
 
 ## How does it work?
 
-Backboned v2 is mixture of [Require.js](http://requirejs.org) for modularization and script loading, [Backbone.js](http://documentcloud.github.io/backbone/) as a client-side MVC and [Mustache](http://mustache.github.io) for templating (client- and server-side). While using the History-API, Backbone.js fetches the data and renders it into the DOM. On the server-side a controller sends the data due to the request type. There are three different types:
+Backboned v2 is a mixture of [Require.js](http://requirejs.org) for modularization and script loading, [Backbone.js](http://documentcloud.github.io/backbone/) as a client-side MVC and [Mustache](http://mustache.github.io) for templating (client- and server-side). While using the History-API, Backbone.js fetches the JSON-data and renders it into the DOM. On the server-side a controller sends the data due to the request type. There are three different types of requests:
 
-* 1. The classical, synchronous request gets the website frame (with templates inside the DOM), the javascripts and the styles.
-* 2. The asynchronous request gets the page's data in JSON-format.
-* 3. The request with $_GET['\_escaped\_fragment\_']-parameter set, gets a static version of the page. Mustache is used on the server-side for rendering the page.
+1. The classical, synchronous request gets the website frame (with templates inside the DOM), the javascripts and the styles.
+2. The asynchronous request gets the page's data in JSON-format.
+3. The request with $_GET['\_escaped\_fragment\_']-parameter set, gets a static version of the page. Mustache is used on the server-side for rendering the page.
 
 With this approach, the hashbang-method for pointing crawlers to the static content is used without hashbang-URIs.
 
@@ -22,7 +22,7 @@ But in contrast to the specification Backboned v2 doesn't make use of hashbang-U
 
 ## How to use the theme?
 
-Download the repo, put the folder into the `wp-content/themes/`-directory of your Wordpress-installation and make sure, the cache-folder is writeable. Otherwise Mustache will have to render a new template each time an `_escaped_fragment_`-request comes. This can really slow things down!
+Download the repo, put the folder into the `wp-content/themes/`-directory of your Wordpress-installation and make sure, the cache-folder is writeable. Otherwise Mustache will have to render a new template each time an `_escaped_fragment_`-request comes. This may really slow things down!
 
 ## Why not to use it?
 
