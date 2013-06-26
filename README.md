@@ -2,6 +2,8 @@
 
 Backboned v2 is the follow-up to [Backboned](https://github.com/herschel666/Backboned) — an AJAX-Wordpress-theme powered by Backbone.js. I decided to create a new repository for this one, as the differences in the concept and the code are too large.
 
+[Visit the Demo](http://the-flippers.frogcp.com/)
+
 ## How does it work?
 
 Backboned v2 is a mixture of [Require.js](http://requirejs.org) for modularization and script loading, [Backbone.js](http://documentcloud.github.io/backbone/) as a client-side MVC and [Mustache](http://mustache.github.io) for templating (client- and server-side). While using the History-API, Backbone.js fetches the JSON-data and renders it into the DOM. On the server-side a controller sends the data due to the request type. There are three different types of requests:
