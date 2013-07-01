@@ -36,7 +36,7 @@ But if you're a developer and you're looking for this exact combination — Word
 
 Yeah, I like this question. Kind of &hellip;
 
-I'm a frontend-developer from Hanover, Germany. You can follow me on [twitter (@Herschel_R)](http://twitter.com/Herschel_R) or [visit my blog](htpp://www.emanuel-kluge.de/). You can even do both if you're more like the danger-seeking kind of a person.
+I'm a frontend-developer from Hanover, Germany. You can follow me on [twitter (@Herschel_R)](http://twitter.com/Herschel_R) or [visit my blog](http://www.emanuel-kluge.de/). You can even do both if you're more like the danger-seeking kind of a person.
 
 ## Where is the interesting license part?
 
