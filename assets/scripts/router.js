@@ -3,7 +3,7 @@ define([
 	'backbone',
 	'collections/wp-collection',
 	'views/body-view'
-], function (app, backbone, wpCollection, BodyView) {
+], function (app, backbone, WpCollection, BodyView) {
 
 	var bodyView = new BodyView({
 		el: document.body
@@ -28,7 +28,7 @@ define([
 		/*
 		 * Instatiating the one and only main-collection.
 		**/
-		collection : new wpCollection({
+		collection : new WpCollection({
 			reset : true
 		}),
 

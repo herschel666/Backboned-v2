@@ -9,7 +9,7 @@ define(['app'], function (app) {
 
 		initialize: function initialize() {
 			this.on('UI.mainViewPending', this.setPending, this);
-			this.on('UI.mainViewReady', this.setPReady, this);
+			this.on('UI.mainViewReady', this.setReady, this);
 		},
 
 		/*
@@ -27,7 +27,7 @@ define(['app'], function (app) {
 		/*
 		 * Handling the arrival of new data.
 		**/
-		setPReady: function setReady() {
+		setReady: function setReady() {
 
 			this
 				.$el

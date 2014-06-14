@@ -11,11 +11,11 @@ Mustache_Autoloader::register();
 **/
 class Backboned {
 
-	private $root;
+	protected $root;
 
-	private $skeleton;
+	protected $skeleton;
 
-	function __construct() {
+	public function __construct() {
 
 		$this->root = dirname(dirname(dirname(__FILE__)));
 		$this->wp_model = new WP_Model();
@@ -76,7 +76,7 @@ class Backboned {
 	/*
 	 * Getting the site-frame-data
 	**/
-	private function __get_frame() {
+	protected function __get_frame() {
 
 		$content = array_merge(
 			$this->wp_model->get('footer'),
@@ -86,7 +86,6 @@ class Backboned {
 		$content['nav-items'] = $this->wp_model->get('main_nav');
 		$content['categories'] = $this->wp_model->get('categories');
 		$content['archives'] = $this->wp_model->get('archives');
-		$content['bookmarks'] = $this->wp_model->get('bookmarks');
 
 		return $content;
 
@@ -97,7 +96,7 @@ class Backboned {
 	 *
 	 * @todo: pagelinks for category pages
 	**/
-	private function __get_pagelinks() {
+	protected function __get_pagelinks() {
 
 		$paged = get_query_var('paged')
 			? get_query_var('paged')
@@ -127,7 +126,7 @@ class Backboned {
 	/*
 	 * The Error page
 	**/
-	private function __generate_404() {
+	protected function __generate_404() {
 
 		$request_type = $this->request_type();
 
@@ -159,7 +158,7 @@ class Backboned {
 	/*
 	 * Output for the loop due to request type
 	**/
-	private function __generate_loop() {
+	protected function __generate_loop() {
 
 		$request_type = $this->request_type();
 
@@ -194,7 +193,7 @@ class Backboned {
 	/*
 	 * Generating the content for a single post.
 	**/
-	private function __generate_post() {
+	protected function __generate_post() {
 
 		$request_type = $this->request_type();
 
@@ -235,7 +234,7 @@ class Backboned {
 	/*
 	 * Generating the content for a static page.
 	**/
-	private function __generate_page() {
+	protected function __generate_page() {
 
 		$request_type = $this->request_type();
 
@@ -275,7 +274,7 @@ class Backboned {
 	/*
 	 * Create a JS-Object with all relevant data
 	**/
-	public function __get_js_variables() {
+	protected function __get_js_variables() {
 
 		$str = "<script>var BB = {";
 		$str .= "dev_mode:" . ($_SERVER['HTTP_HOST'] === 'wp.dev' ? 'true' : 'false') . ",";
@@ -287,7 +286,6 @@ class Backboned {
 		$str .= "aside:{";
 		$str .= "categories:" . json_encode($this->wp_model->get('categories')) . ",";
 		$str .= "archives:" . json_encode($this->wp_model->get('archives')) . ",";
-		$str .= "bookmarks:" . json_encode($this->wp_model->get('bookmarks'));
 		$str .= "},";
 		$str .= "footer:" . json_encode($this->wp_model->get('footer')) . ",";
 		$str .= "post_count:" . $this->wp_model->get('post_count');
@@ -300,7 +298,7 @@ class Backboned {
 	/*
 	 * Create the JS-script-embedding
 	**/
-	public function __get_js_scripts() {
+	protected function __get_js_scripts() {
 
 		$str = '<script src="' . get_bloginfo('template_url');
 		$str .= '/assets/scripts/vendor/require-2.1.5.min.js"';
@@ -315,51 +313,28 @@ class Backboned {
 	/*
 	 * Create Template-Strings for the DOM
 	**/
-	private function __get_partials() {
+	protected function __get_partials() {
 
-		$str = '<script type="text/x-template" id="loop-tmpl">';
-		$str .= str_replace(array("\n", "\t", "\r"), '', file_get_contents($this->root . '/views/partials/posts.mustache'));
-		$str .= '</script>';
+		$templates = array(
+			'loop' => 'posts',
+			'page' => 'page',
+			'single' => 'post',
+			'error' => 'error',
+			'comments' => 'comments',
+			'commentform' => 'commentform',
+			'page-links' => 'page-links',
+			'header' => 'main-header',
+			'navigation' => 'main-nav',
+			'aside' => 'main-aside',
+			'footer' => 'main-footer'
+		);
+		$str = '';
 
-		$str .= '<script type="text/x-template" id="page-tmpl">';
-		$str .= str_replace(array("\n", "\t", "\r"), '', file_get_contents($this->root . '/views/partials/page.mustache'));
-		$str .= '</script>';
-
-		$str .= '<script type="text/x-template" id="single-tmpl">';
-		$str .= str_replace(array("\n", "\t", "\r"), '', file_get_contents($this->root . '/views/partials/post.mustache'));
-		$str .= '</script>';
-
-		$str .= '<script type="text/x-template" id="error-tmpl">';
-		$str .= str_replace(array("\n", "\t", "\r"), '', file_get_contents($this->root . '/views/partials/error.mustache'));
-		$str .= '</script>';
-
-		$str .= '<script type="text/x-template" id="comments-tmpl">';
-		$str .= str_replace(array("\n", "\t", "\r"), '', file_get_contents($this->root . '/views/partials/comments.mustache'));
-		$str .= '</script>';
-
-		$str .= '<script type="text/x-template" id="commentform-tmpl">';
-		$str .= str_replace(array("\n", "\t", "\r"), '', file_get_contents($this->root . '/views/partials/commentform.mustache'));
-		$str .= '</script>';
-
-		$str .= '<script type="text/x-template" id="page-links-tmpl">';
-		$str .= str_replace(array("\n", "\t", "\r"), '', file_get_contents($this->root . '/views/partials/page-links.mustache'));
-		$str .= '</script>';
-
-		$str .= '<script type="text/x-template" id="header-tmpl">';
-		$str .= str_replace(array("\n", "\t", "\r"), '', file_get_contents($this->root . '/views/partials/main-header.mustache'));
-		$str .= '</script>';
-
-		$str .= '<script type="text/x-template" id="navigation-tmpl">';
-		$str .= str_replace(array("\n", "\t", "\r"), '', file_get_contents($this->root . '/views/partials/main-nav.mustache'));
-		$str .= '</script>';
-
-		$str .= '<script type="text/x-template" id="aside-tmpl">';
-		$str .= str_replace(array("\n", "\t", "\r"), '', file_get_contents($this->root . '/views/partials/main-aside.mustache'));
-		$str .= '</script>';
-
-		$str .= '<script type="text/x-template" id="footer-tmpl">';
-		$str .= str_replace(array("\n", "\t", "\r"), '', file_get_contents($this->root . '/views/partials/main-footer.mustache'));
-		$str .= '</script>';
+		foreach ( $templates as $id => $path ) {
+			$str .= '<script type="text/x-template" id="' . $id . '-tmpl">';
+			$str .= str_replace(array("\n", "\t", "\r"), '', file_get_contents($this->root . '/views/partials/' . $path . '.mustache'));
+			$str .= '</script>';
+		}
 
 		return $str;
 

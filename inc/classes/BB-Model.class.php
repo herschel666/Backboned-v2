@@ -5,9 +5,9 @@
 **/
 class WP_Model {
 
-	private $user;
+	protected $user;
 
-	function __construct() {
+	public function __construct() {
 
 		global $current_user;
 		get_currentuserinfo();
@@ -18,9 +18,9 @@ class WP_Model {
 	/*
 	 * Auto-<p> the passed content.
 	**/
-	private function autop(&$content, $key, $eference) {
+	protected function autop(&$content, $key, $eference) {
 
-		if ( $key != reference ) {
+		if ( $key != $reference ) {
 			return;
 		}
 
@@ -43,12 +43,12 @@ class WP_Model {
 	/*
 	 * Header info
 	**/
-	private function __get_site_header() {
+	protected function __get_site_header() {
 
 		return array(
 			'sitename' => get_bloginfo('name'),
 			'description' => get_bloginfo('description'),
-			'home' => get_bloginfo('home')
+			'home' => get_bloginfo('url')
 		);
 
 	}
@@ -56,28 +56,28 @@ class WP_Model {
 	/*
 	 * Main navigation
 	**/
-	private function __get_main_nav() {
+	protected function __get_main_nav() {
 
 		$pages = get_pages('parent=0');
 		$page_array = array();
 		$count = 0;
 
-		if ( !empty($pages) ) {
+		if ( empty($pages) ) {
+			return $page_array;
+		}
 
-			foreach( $pages as $page ) {
+		foreach( $pages as $page ) {
 
-				array_push($page_array, array(
-					'title' => $page->post_title,
-					'slug' => get_permalink($page->ID)
-				));
+			array_push($page_array, array(
+				'title' => $page->post_title,
+				'slug' => get_permalink($page->ID)
+			));
 
-				if ( is_page($page->ID) ) {
-					$page_array[$count]['current'] = true;
-				}
-
-				$count++;
-
+			if ( is_page($page->ID) ) {
+				$page_array[$count]['current'] = true;
 			}
+
+			$count++;
 
 		}
 
@@ -88,23 +88,23 @@ class WP_Model {
 	/*
 	 * Category navigation
 	**/
-	private function __get_categories($jsObj = false) {
+	protected function __get_categories($jsObj = false) {
 
 		$categories = get_categories('hierarchical=0');
 		$category_array = array();
 
-		if ( !empty($categories) ) {
+		if ( empty($categories) ) {
+			return $category_array;
+		}
 
-			foreach( $categories as $category ) {
+		foreach( $categories as $category ) {
 
-				array_push($category_array, array(
-					'title' => $category->name,
-					'slug' => '/category/' . $category->slug . '/',
-					'cat_id' => $category->term_id,
-					'count' => $category->count
-				));
-
-			}
+			$category_array[] = array(
+				'title' => $category->name,
+				'slug' => '/category/' . $category->slug . '/',
+				'cat_id' => $category->term_id,
+				'count' => $category->count
+			);
 
 		}
 
@@ -115,7 +115,7 @@ class WP_Model {
 	/*
 	 * Archive navigation
 	**/
-	private function __get_archives() {
+	protected function __get_archives() {
 
 		$archive = wp_get_archives('format=custom&echo=0&show_post_count=1&before=&after=');
 		$archive = str_replace('&nbsp;', " ", $archive);
@@ -124,20 +124,23 @@ class WP_Model {
 
 		array_splice($archive, -1);
 
-		if ( !empty($archive) ) {
+		if ( empty($archive) ) {
+			return $archive_array;
+		}
 
-			foreach( $archive as $archive_item ) {
+		foreach( $archive as $archive_item ) {
 
-				preg_match('/href=[\'"]?([^\'" >]+)/', $archive_item, $slug);
-				preg_match('/title=[\'"]?([^\'">]+)/', $archive_item, $title);
-				preg_match('/\((\d+)\)/', $archive_item, $count);
+			preg_match('/\'([^\']*)\'>([^<]*)[^(]*\((\d*)/i', $archive_item, $archive_data);
 
-				array_push($archive_array, array(
-					'title' => $title[1],
-					'slug' => $slug[1],
-					'count' => $count[1]
-				));
+			if ( !$archive_data || count($archive_data) < 4 ) {
+				continue;
 			}
+
+			$archive_array[] = array(
+				'slug' => $archive_data[1],
+				'title' => $archive_data[2],
+				'count' => $archive_data[3]
+			);
 		}
 
 		return $archive_array;
@@ -145,34 +148,9 @@ class WP_Model {
 	}
 
 	/*
-	 * Bookmarks navigation
-	**/
-	private function __get_bookmarks() {
-
-		$bookmarks = get_bookmarks();
-		$bookmark_array = array();
-
-		if ( !empty($bookmarks) ) {
-
-			foreach( $bookmarks as $bookmark ) {
-
-				array_push($bookmark_array, array(
-					'title' => $bookmark->link_name,
-					'slug' => $bookmark->link_url
-				));
-
-			}
-
-		}
-
-		return $bookmark_array;
-
-	}
-
-	/*
 	 * The site footer
 	**/
-	private function __get_footer() {
+	protected function __get_footer() {
 
 		return array(
 			'year' => date('Y'),
@@ -184,7 +162,7 @@ class WP_Model {
 	/*
 	 * Total post count
 	**/
-	private function __get_post_count() {
+	protected function __get_post_count() {
 
 		$count_posts = wp_count_posts();
 
@@ -195,7 +173,7 @@ class WP_Model {
 	/*
 	 * Get name of currently logged in user
 	**/
-	private function __get_username() {
+	protected function __get_username() {
 
 		return $this->user->display_name;
 
@@ -204,7 +182,7 @@ class WP_Model {
 	/*
 	 * The comment form
 	**/
-	private function __get_commentform($id = null) {
+	protected function __get_commentform($id = null) {
 
 		$ret = array();
 
@@ -228,7 +206,7 @@ class WP_Model {
 	/*
 	 * The current Loop
 	**/
-	private function __get_loop() {
+	protected function __get_loop() {
 
 		$paged = get_query_var('paged')
 			? get_query_var('paged')
@@ -272,7 +250,7 @@ class WP_Model {
 	/*
 	 * Current Post or by specified ID
 	**/
-	private function __get_post($id = null) {
+	protected function __get_post($id = null) {
 
 		global $post;
 
@@ -293,7 +271,7 @@ class WP_Model {
 	/*
 	 * Comments for the current post or for a post specified by ID
 	**/
-	private function __get_comments($id = null) {
+	protected function __get_comments($id = null) {
 
 		global $post;
 
@@ -324,7 +302,7 @@ class WP_Model {
 	/*
 	 * Categories for the current post or for a post specified by ID
 	**/
-	private function __get_post_cats($id = null) {
+	protected function __get_post_cats($id = null) {
 
 		global $post;
 
@@ -349,7 +327,7 @@ class WP_Model {
 	/*
 	 * Current page or by specified ID
 	**/
-	private function __get_page($id = null) {
+	protected function __get_page($id = null) {
 
 		global $post;
 
@@ -373,7 +351,7 @@ class WP_Model {
 	/*
 	 * Get page/post author
 	**/
-	private function __get_author($id = null) {
+	protected function __get_author($id = null) {
 
 		return array(
 			'display_name' => get_the_author_meta('display_name', $id),
@@ -386,7 +364,7 @@ class WP_Model {
 	/*
 	 * Content of the 404-page
 	**/
-	private function __get_404() {
+	protected function __get_404() {
 
 		return array(
 			'title' => 'Error 404',

@@ -2,7 +2,7 @@
 
 	<section class="categories-outer">
 		<h1>Categories</h1>
-		<nav class="categories">
+		<div class="categories">
 			<ul>
 				{{#categories}}
 					<li>
@@ -10,12 +10,12 @@
 					</li>
 				{{/categories}}
 			<ul>
-		</nav>
+		</div>
 	</section>
 
 	<section class="archive-outer">
 		<h1>Archive</h1>
-		<nav class="archive">
+		<div class="archive">
 			<ul>
 				{{#archives}}
 					<li>
@@ -23,20 +23,7 @@
 					</li>
 				{{/archives}}
 			<ul>
-		</nav>
-	</section>
-
-	<section class="bookmarks-outer">
-		<h1>Bookmarks</h1>
-		<nav class="bookmarks">
-			<ul>
-				{{#bookmarks}}
-					<li>
-						<a href="{{slug}}">{{title}}</a>
-					</li>
-				{{/bookmarks}}
-			<ul>
-		</nav>
+		</div>
 	</section>
 
 </aside>
