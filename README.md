@@ -11,7 +11,7 @@ For further development install the Node-dependencies as well …
 
 	$ npm install
 
-
+[Visit the Demo](http://the-flippers.frogcp.com/)
 
 ## How does it work?
 
