@@ -1,6 +1,6 @@
 {
   "name": "Backboned-v2",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "An AJAX-Wordpress-Theme powered by Backbone.js, Require.js and Mustache-Templating",
   "devDependencies": {
     "grunt": "~0.4.1",

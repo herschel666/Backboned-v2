@@ -16,20 +16,9 @@ class WP_Model {
 	}
 
 	/*
-	 * Auto-<p> the passed content.
-	**/
-	protected function autop(&$content, $key, $eference) {
-
-		if ( $key != $reference ) {
-			return;
-		}
-
-		$content->{$reference} = wpautop($content->{$reference});
-
-	}
-
-	/*
 	 * Global Getter-function.
+	 *
+	 * @return function
 	**/
 	public function get() {
 
@@ -42,6 +31,8 @@ class WP_Model {
 
 	/*
 	 * Header info
+	 *
+	 * @return array
 	**/
 	protected function __get_site_header() {
 
@@ -55,6 +46,8 @@ class WP_Model {
 
 	/*
 	 * Main navigation
+	 *
+	 * @return array
 	**/
 	protected function __get_main_nav() {
 
@@ -87,8 +80,10 @@ class WP_Model {
 
 	/*
 	 * Category navigation
+	 *
+	 * @return array
 	**/
-	protected function __get_categories($jsObj = false) {
+	protected function __get_categories() {
 
 		$categories = get_categories('hierarchical=0');
 		$category_array = array();
@@ -114,6 +109,8 @@ class WP_Model {
 
 	/*
 	 * Archive navigation
+	 *
+	 * @return array
 	**/
 	protected function __get_archives() {
 
@@ -149,6 +146,8 @@ class WP_Model {
 
 	/*
 	 * The site footer
+	 *
+	 * @return array
 	**/
 	protected function __get_footer() {
 
@@ -161,6 +160,8 @@ class WP_Model {
 
 	/*
 	 * Total post count
+	 *
+	 * @return number
 	**/
 	protected function __get_post_count() {
 
@@ -181,6 +182,9 @@ class WP_Model {
 
 	/*
 	 * The comment form
+	 *
+	 * @param  number [$id] Post-/Page-ID
+	 * @return array
 	**/
 	protected function __get_commentform($id = null) {
 
@@ -205,6 +209,8 @@ class WP_Model {
 
 	/*
 	 * The current Loop
+	 *
+	 * @return array
 	**/
 	protected function __get_loop() {
 
@@ -230,13 +236,11 @@ class WP_Model {
 
 		foreach ( $posts as &$post ) {
 
-			array_walk($post, array('WP_Model', 'autop'), 'post_content');
-
 			$result[] = array(
 				'ID' => $post->ID,
 				'post_title' => $post->post_title,
 				'permalink' => get_permalink($post->ID),
-				'post_content' => $post->post_content,
+				'post_content' => apply_filters('the_content', wpautop($post->post_content)),
 				'nice_date' => date(get_option('date_format'), strtotime($post->post_date)),
 				'comment_count' => $post->comment_count
 			);
@@ -249,6 +253,9 @@ class WP_Model {
 
 	/*
 	 * Current Post or by specified ID
+	 *
+	 * @param  number [$id] Post-ID
+	 * @return array
 	**/
 	protected function __get_post($id = null) {
 
@@ -261,7 +268,7 @@ class WP_Model {
 		return array(
 			'ID' => $post->ID,
 			'post_title' => $post->post_title,
-			'post_content' => wpautop($post->post_content),
+			'post_content' => apply_filters('the_content', wpautop($post->post_content)),
 			'nice_date' => date(get_option('date_format'), strtotime($post->post_date)),
 			'post_author' => $post->post_author
 		);
@@ -270,6 +277,9 @@ class WP_Model {
 
 	/*
 	 * Comments for the current post or for a post specified by ID
+	 *
+	 * @param  number [$id] Post-ID
+	 * @return array
 	**/
 	protected function __get_comments($id = null) {
 
@@ -282,8 +292,7 @@ class WP_Model {
 		$comments = get_comments('post_id=' . $id);
 		$result = array();
 
-		foreach ( $comments as &$comment ) {
-			array_walk($comment, array('WP_Model', 'autop'), 'comment_content');
+		foreach ( $comments as $comment ) {
 			$result[] = array(
 				'comment_ID' => $comment->comment_ID,
 				'nice_date' => date(get_option('date_format'), strtotime($comment->comment_date)),
@@ -291,7 +300,7 @@ class WP_Model {
 				'comment_author_url' => $comment->comment_author_url == 'http://'
 					? ''
 					: $comment->comment_author_url,
-				'comment_content' => $comment->comment_content
+				'comment_content' => wpautop($comment->comment_content)
 			);
 		}
 
@@ -301,6 +310,9 @@ class WP_Model {
 
 	/*
 	 * Categories for the current post or for a post specified by ID
+	 *
+	 * @param  number [$id] Post-ID
+	 * @return array
 	**/
 	protected function __get_post_cats($id = null) {
 
@@ -326,13 +338,16 @@ class WP_Model {
 
 	/*
 	 * Current page or by specified ID
+	 *
+	 * @param  number [$id] Page-ID
+	 * @return array
 	**/
 	protected function __get_page($id = null) {
 
 		global $post;
 
 		if ( $id ) {
-			$post = query_posts('page_id=' . $id);
+			$post = query_posts('page_id=' . (int) $id);
 		}
 
 		$post->post_content = wpautop($post->post_content);
@@ -341,7 +356,7 @@ class WP_Model {
 		return array(
 			'ID' => $post->ID,
 			'post_title' => $post->post_title,
-			'post_content' => wpautop($post->post_content),
+			'post_content' => apply_filters('the_content', wpautop($post->post_content)),
 			'nice_date' => date(get_option('date_format'), strtotime($post->post_date)),
 			'post_author' => $post->post_author
 		);
@@ -350,19 +365,28 @@ class WP_Model {
 
 	/*
 	 * Get page/post author
+	 *
+	 * @param  number [$id] Post-/Page-ID
+	 * @return array
 	**/
 	protected function __get_author($id = null) {
 
+		if ( is_null($id) ) {
+			return array();
+		}
+
 		return array(
-			'display_name' => get_the_author_meta('display_name', $id),
-			'first_name' => get_the_author_meta('first_name', $id),
-			'last_name' => get_the_author_meta('last_name', $id)
+			'display_name' => get_the_author_meta('display_name', (int) $id),
+			'first_name' => get_the_author_meta('first_name', (int) $id),
+			'last_name' => get_the_author_meta('last_name', (int) $id)
 		);
 
 	}
 
 	/*
 	 * Content of the 404-page
+	 *
+	 * @return array
 	**/
 	protected function __get_404() {
 

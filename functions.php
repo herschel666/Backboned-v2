@@ -81,7 +81,7 @@ function bb_get_js_variables() {
 
 	$js_variables = $inst->get('js_variables');
 
-	echo $js_variables;
+	echo '<script>BB = ' . json_encode($js_variables) . ';</script>';
 
 }
 

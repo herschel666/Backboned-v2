@@ -11,9 +11,15 @@ Mustache_Autoloader::register();
 **/
 class Backboned {
 
+	/**
+	 * @var string
+	 */
 	protected $root;
 
-	protected $skeleton;
+	/**
+	 * @var WP_Model
+	 */
+	protected $wp_model;
 
 	public function __construct() {
 
@@ -35,6 +41,9 @@ class Backboned {
 
 	/*
 	 * Global Getter-function.
+	 *
+	 * @param *
+	 * @return function
 	**/
 	public function get() {
 
@@ -48,6 +57,8 @@ class Backboned {
 	/*
 	 * Check, wether it's a normal request, an async
 	 * request or an request by a search engine crawler.
+	 *
+	 * @return string
 	**/
 	public function request_type() {
 
@@ -63,6 +74,12 @@ class Backboned {
 
 	}
 
+	/**
+	 * Gets the content by type
+	 *
+	 * @param  string [$type]
+	 * @return function
+	 */
 	public function content($type = 'loop') {
 
 		if ( is_404() ) {
@@ -75,6 +92,8 @@ class Backboned {
 
 	/*
 	 * Getting the site-frame-data
+	 *
+	 * @return array
 	**/
 	protected function __get_frame() {
 
@@ -95,6 +114,8 @@ class Backboned {
 	 * Loop pagination
 	 *
 	 * @todo: pagelinks for category pages
+	 *
+	 * @return array
 	**/
 	protected function __get_pagelinks() {
 
@@ -273,30 +294,34 @@ class Backboned {
 
 	/*
 	 * Create a JS-Object with all relevant data
+	 *
+	 * @return array
 	**/
 	protected function __get_js_variables() {
 
-		$str = "<script>var BB = {";
-		$str .= "dev_mode:" . ($_SERVER['HTTP_HOST'] === 'wp.dev' ? 'true' : 'false') . ",";
-		$str .= "base_url:'" . get_option('home') . "',";
-		$str .= "template_url:'" . get_bloginfo('template_url') . "',";
-		$str .= "logged_in:" . (is_user_logged_in() ? "true" : "false") . ",";
-		$str .= "site_header:" . json_encode($this->wp_model->get('site_header')) . ",";
-		$str .= "main_nav:" . json_encode($this->wp_model->get('main_nav')) . ",";
-		$str .= "aside:{";
-		$str .= "categories:" . json_encode($this->wp_model->get('categories')) . ",";
-		$str .= "archives:" . json_encode($this->wp_model->get('archives')) . ",";
-		$str .= "},";
-		$str .= "footer:" . json_encode($this->wp_model->get('footer')) . ",";
-		$str .= "post_count:" . $this->wp_model->get('post_count');
-		$str .= "};</script>";
+		$variables = array(
+			'dev_mode' => $_SERVER['HTTP_HOST'] === 'wp.dev',
+			'base_url' => get_option('home'),
+			'template_url' => get_bloginfo('template_url'),
+			'logged_in' => is_user_logged_in(),
+			'site_header' => $this->wp_model->get('site_header'),
+			'main_nav' => $this->wp_model->get('main_nav'),
+			'aside' => array(
+				'categories' => $this->wp_model->get('categories'),
+				'archives' => $this->wp_model->get('archives')
+			),
+			'footer' => $this->wp_model->get('footer'),
+			'post_count' => $this->wp_model->get('post_count')
+		);
 
-		return $str;
+		return $variables;
 
 	}
 
 	/*
 	 * Create the JS-script-embedding
+	 *
+	 * @return string
 	**/
 	protected function __get_js_scripts() {
 
@@ -312,6 +337,8 @@ class Backboned {
 
 	/*
 	 * Create Template-Strings for the DOM
+	 *
+	 * @return string
 	**/
 	protected function __get_partials() {
 
