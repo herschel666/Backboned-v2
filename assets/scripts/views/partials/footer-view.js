@@ -13,9 +13,7 @@ define([
 		tagName : 'footer',
 
 		initialize : function initialize() {
-
 			this.render();
-
 		},
 
 		render : function render() {

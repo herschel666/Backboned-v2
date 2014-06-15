@@ -2,6 +2,17 @@
 
 Backboned v2 is the follow-up to [Backboned](https://github.com/herschel666/Backboned) — an AJAX-Wordpress-theme powered by Backbone.js. I decided to create a new repository for this one, as the differences in the concept and the code are too large.
 
+For usage go into your terminal and do …
+
+	$ cd path/to/backboned-v2
+	$ bower install
+
+For further development install the Node-dependencies as well …
+
+	$ npm install
+
+
+
 ## How does it work?
 
 Backboned v2 is a mixture of [Require.js](http://requirejs.org) for modularization and script loading, [Backbone.js](http://documentcloud.github.io/backbone/) as a client-side MVC and [Mustache](http://mustache.github.io) for templating (client- and server-side). While using the History-API, Backbone.js fetches the JSON-data and renders it into the DOM. On the server-side a controller sends the data due to the request type. There are three different types of requests:
@@ -34,14 +45,13 @@ But if you're a developer and you're looking for this exact combination — Word
 
 Yeah, I like this question. Kind of &hellip;
 
-I'm a frontend-developer from Hanover, Germany. You can follow me on [twitter (@Herschel_R)](http://twitter.com/Herschel_R) or [visit my blog](htpp://www.emanuel-kluge.de/). You can even do both if you're more like the danger-seeking kind of a person.
+I'm a frontend-developer from Hanover, Germany. You can follow me on [twitter (@Herschel_R)](http://twitter.com/Herschel_R) or [visit my blog](htpp://www.emanuel-kluge.de/). You can even do both.
 
 ## Where is the interesting license part?
 
 Right here!
 
-Copyright 2013 Emanuel Kluge  
-https://github.com/herschel666/Backboned-v2
+Copyright 2014 Emanuel Kluge
 
 Permission is hereby granted, free of charge, to any person obtaining
 a copy of this software and associated documentation files (the

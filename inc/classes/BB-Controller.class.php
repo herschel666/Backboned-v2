@@ -113,8 +113,6 @@ class Backboned {
 	/*
 	 * Loop pagination
 	 *
-	 * @todo: pagelinks for category pages
-	 *
 	 * @return array
 	**/
 	protected function __get_pagelinks() {

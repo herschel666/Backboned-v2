@@ -3,26 +3,7 @@
    ========================================================================== */
 
 /*
- * Image replacement
- */
-
-.ir {
-    background-color: transparent;
-    border: 0;
-    overflow: hidden;
-    /* IE 6/7 fallback */
-    *text-indent: -9999px;
-}
-
-.ir:before {
-    content: "";
-    display: block;
-    width: 0;
-    height: 150%;
-}
-
-/*
- * Hide from both screenreaders and browsers: h5bp.com/u
+ * Hide visually and from screen readers: h5bp.com/u
  */
 
 .hidden {
@@ -31,7 +12,7 @@
 }
 
 /*
- * Hide only visually, but have it available for screenreaders: h5bp.com/v
+ * Hide only visually, but have it available for screen readers: h5bp.com/v
  */
 
 .visuallyhidden {
@@ -61,7 +42,7 @@
 }
 
 /*
- * Hide visually and from screenreaders, but maintain layout
+ * Hide visually and from screen readers, but maintain layout
  */
 
 .invisible {
@@ -90,18 +71,16 @@
     clear: both;
 }
 
-/*
- * For IE 6/7 only
- * Include this rule to trigger hasLayout and contain floats.
- */
-
-.clearfix {
-    *zoom: 1;
+@media print,
+       (-o-min-device-pixel-ratio: 5/4),
+       (-webkit-min-device-pixel-ratio: 1.25),
+       (min-resolution: 120dpi) {
+    /* Style adjustments for high resolution devices */
 }
 
 /* ==========================================================================
    Print styles.
-   Inlined to avoid required HTTP connection: h5bp.com/r
+   Inlined to avoid the additional HTTP request: h5bp.com/r
    ========================================================================== */
 
 @media print {
@@ -126,12 +105,12 @@
     }
 
     /*
-     * Don't show links for images, or javascript/internal links
+     * Don't show links that are fragment identifiers,
+     * or use the `javascript:` pseudo protocol
      */
 
-    .ir a:after,
-    a[href^="javascript:"]:after,
-    a[href^="#"]:after {
+    a[href^="#"]:after,
+    a[href^="javascript:"]:after {
         content: "";
     }
 
@@ -152,10 +131,6 @@
 
     img {
         max-width: 100% !important;
-    }
-
-    @page {
-        margin: 0.5cm;
     }
 
     p,

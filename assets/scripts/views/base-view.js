@@ -6,9 +6,13 @@ define(['backbone', 'mustache'], function (Backbone, Mustache) {
 	**/
 	return Backbone.View.extend({
 
+		initialize: function (opts) {
+			this.opts = opts || {};
+		},
+
 		render : function render() {
 
-			this.$el.html(Mustache.render(this.options.tmpl, this.options.content));
+			this.$el.html(Mustache.render(this.opts.tmpl, this.opts.content));
 
 			return this;
 

@@ -1,0 +1,349 @@
+body {
+	background-color: $background;
+	color: $color;
+	overflow-y: scroll;
+	font-weight: 400;
+	font-family: 'Roboto', sans-serif;
+	}
+
+strong {
+	font-weight: 700;
+	}
+
+em {
+	font-style: italic;
+	}
+
+ul {
+	list-style: none;
+	}
+
+a:link,
+a:visited {
+	color: $link;
+	@include transition(color);
+	}
+
+a:hover,
+a:focus {
+	color: $link-hover;
+	text-decoration: none;
+	}
+
+h1, h2, h3, h4, h5, h6, small {
+	font-weight: 300;
+	}
+
+.light-link {
+	@include transition(color);
+
+	&:link,
+	&:visited {
+		color: $light-link;
+		text-decoration: none;
+		}
+
+	&:hover,
+	&:focus {
+		color: $light-link-hover;
+		}
+
+	}
+
+.align-right {
+	text-align: right;
+	}
+.align-center {
+	text-align: center;
+	}
+.align-left {
+	text-align: left;
+	}
+
+.main-header {
+	padding: em(5, 16) em(10, 16);
+	background-color: $green;
+	}
+.main-header-inner {
+	max-width: $main-width;
+	position: relative;
+	margin: 0 auto;
+
+	h1 {
+		margin: 0;
+		line-height: #{(40/24)};
+		font-size: em(24, 16);
+		font-weight: normal;
+		text-shadow: 0 1px 1px rgba(0, 0, 0, .4);
+		}
+
+	.description {
+		margin: 0;
+		line-height: #{(20/16)};
+		font-size: em(13, 16);
+		color: lighten($green, 70%);
+		}
+
+	.page-loading {
+		position: absolute;
+		right: 0;
+		top: em(5, 16);
+		font-size: em(32, 16);
+		color: #FFF;
+		text-shadow: 0 1px 1px rgba(0, 0, 0, .4);
+		opacity: .7;
+		display: none;
+
+		.request-pending & {
+			display: block;
+			}
+
+		}
+
+	}
+
+.main-nav {
+	padding: 1px em(10, 16);
+	margin-bottom: em(32, 16);
+	background-color: desaturate(lighten($green, 15%), 30%);
+
+	nav {
+		max-width: $main-width;
+		margin: 0 auto;
+		}
+
+	ul {
+		padding: 0;
+		margin: 0;
+		}
+
+	li {
+		float: left;
+		}
+
+	a {
+		padding: 0 em(10, 16);
+		margin-right: 1px;
+		display: block;
+		line-height: #{(30/16)};
+		background-color: darken($green, 5%);
+		font-size: em(14, 16);
+		@include transition(background-color);
+
+		&:hover,
+		&:focus {
+			background-color: $green;
+			}
+
+		}
+
+	.current a {
+		background-color: $green;
+		}
+
+	}
+
+.content {
+	max-width: $main-width;
+	padding: 0 em(10, 16);
+	margin: 0 auto;
+	}
+
+.posts-outer {
+	float: left;
+	width: $left-col;
+	margin-right: $left-col-margin;
+	overflow-x: hidden;
+	backface-visibility: hidden;
+	-webkit-backface-visibility: hidden;
+	opacity: 0;
+	@include transition (all .15s ease-out);
+	@include transform (translateX(em(-40)) translateZ(0));
+	}
+
+.content-ready .posts-outer {
+	opacity: 1;
+	@include transform (translateX(0) translateZ(0));
+	}
+
+.posts,
+.comments,
+.comment-form-inner {
+	padding: em(24, 16);
+	margin-bottom: em(20, 16);
+	background-color: $content-background;
+	border: 1px solid $content-border;
+	border-color: rgba(0, 0, 0, .5);
+	}
+
+.post {
+	margin-bottom: em(10, 16);
+	}
+
+.post-body {
+	padding-bottom: em(10, 16);
+	margin-bottom: em(10, 16);
+	border-bottom: 1px solid #DDD;
+
+	img {
+		width: 100%;
+		max-width: $content-width;
+		height: auto;
+		margin-bottom: 1em;
+		}
+
+	.alignnone {
+		display: block;
+		}
+	.alignleft {
+		float: left;
+		margin-right: em(10, 16);
+		}
+	.alignright {
+		float: right;
+		margin-left: em(10, 16);
+		}
+	.aligncenter {
+		display: block;
+		margin-left: auto;
+		margin-right: auto;
+		}
+
+	}
+
+.link-to-comments {
+	float: right;
+
+	.icon-comments {
+		margin-right: em(5, 16);
+		text-decoration: none;
+		}
+
+	}
+
+.category-link {
+	display: inline-block;
+	margin-left: em(8, 13);
+
+	i {
+		margin-right: em(3, 13);
+		}
+
+	}
+
+.page-links {
+	margin-top: em(32, 16);
+
+	.page-link {
+		width: 50%;
+		min-height: em(20, 16);
+		float: left;
+		line-height: #{(24/16)};
+		}
+
+	i {
+		font-size: em(13, 16);
+		color: lighten(desaturate($color, 50%), 10%);
+		}
+
+	.previous-posts i {
+		margin-right: em(5, 13);
+		}
+
+	.next-posts i {
+		margin-left: em(5, 13);
+		}
+
+	}
+
+.comment-form-inner.error .error-message {
+	display: block !important;
+	visibility: visible !important;
+	padding: em(5, 16);
+	margin-bottom: 1em;
+	border: 1px solid $red;
+	background-color: lighten($red, 42%);
+	}
+
+.comment-heading,
+.comment {
+	padding-bottom: em(10, 16);
+	margin-bottom: em(10, 16);
+	border-bottom: 1px solid #DDD;
+
+	&:last-child {
+		padding-bottom: 0;
+		margin-bottom: 0;
+		border-bottom: none;
+		}
+
+	}
+
+.comment-heading {
+	margin-top: 0;
+	}
+
+.form-row {
+	margin-bottom: em(10, 16);
+
+	label {
+		display: block;
+		font-size: em(13, 16);
+		}
+
+	&.error {
+		label {
+			color: $red;
+			}
+		input,
+		textarea {
+			background-color: lighten($red, 42%);
+			}
+		}
+
+	}
+
+.main-aside {
+	float: left;
+	width: $right-col;
+
+	h1 {
+		text-shadow: 0 1px 1px rgba(255,255,255,.7);
+		}
+
+	}
+
+.main-footer {
+	padding: 0 em(10, 16);
+	margin-top: em(32, 16);
+	background-color: $green;
+
+	footer {
+		width: $main-width;
+		margin: 0 auto;
+		line-height: #{(30/12)};
+		font-size: em(12, 16);
+		color: lighten($green, 70%);
+
+		a {
+			color: lighten($green, 70%);
+			}
+
+		div {
+			width: 50%;
+
+			&.footer-left {
+				float: left;
+				}
+
+			&.footer-right {
+				float: right;
+				}
+
+			}
+
+		}
+
+	}
+
+

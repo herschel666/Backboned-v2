@@ -17,8 +17,9 @@ define([
 			'submit form' : 'validateForm'
 		},
 
-		initialize : function initialize() {
+		initialize : function initialize(opts) {
 
+			this.opts = opts || {};
 			this.render();
 			app.on('UI.removeCommentForm', this.removeForm, this);
 
@@ -33,7 +34,7 @@ define([
 				.delegateEvents()
 				.$el
 				.html(Mustache.render(this.tmpl, {
-					commentform : this.options.content
+					commentform : this.opts.content
 				}))
 				.show();
 

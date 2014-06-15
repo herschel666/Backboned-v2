@@ -1,0 +1,31 @@
+{
+  "name": "Backboned-v2",
+  "version": "0.1.0",
+  "homepage": "https://github.com/herschel666/Backboned-v2",
+  "authors": [
+    "Emanuel Kluge"
+  ],
+  "description": "An AJAX-Wordpress-Theme powered by Backbone.js, Require.js and Mustache-Templating",
+  "keywords": [
+    "ajax",
+    "jquery",
+    "backbone"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "assets/vendor",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "Font-Awesome": "~4.1.0",
+    "jquery": "1.11.1",
+    "mustache": "~0.8.2",
+    "underscore": "~1.6.0",
+    "backbone": "~1.1.2"
+  }
+}

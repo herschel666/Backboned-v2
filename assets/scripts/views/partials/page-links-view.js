@@ -11,8 +11,9 @@ define([
 
 		tmpl : $('#page-links-tmpl').html(),
 
-		initialize : function initialize() {
+		initialize : function initialize(opts) {
 
+			this.opts = opts || {};
 			this.render();
 			app.on('UI.removePageLinks', this.removePageLinks, this);
 
@@ -22,7 +23,7 @@ define([
 
 			return this
 				.$el
-				.html(Mustache.render(this.tmpl, this.options.content))
+				.html(Mustache.render(this.tmpl, this.opts.content))
 				.show();
 
 		},

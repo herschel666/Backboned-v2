@@ -11,8 +11,9 @@ define([
 
 		tmpl : $('#comments-tmpl').html(),
 
-		initialize : function initialize() {
+		initialize : function initialize(opts) {
 
+			this.opts = opts || {};
 			this.render();
 			app.on('UI.removeComments', this.removeComments, this);
 			app.on('UI.newCommentAdded', this.addComment, this);
@@ -30,7 +31,7 @@ define([
 				.$el
 				.show()
 				.html(Mustache.render(this.tmpl, {
-					comments : this.options.content
+					comments : this.opts.content
 				}));
 
 			return this;
@@ -53,7 +54,7 @@ define([
 		**/
 		addComment : function addComment(comments) {
 
-			this.options.content = comments;
+			this.opts.content = comments;
 			this.render();
 
 		}

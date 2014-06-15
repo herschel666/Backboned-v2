@@ -11,9 +11,7 @@ define([
 		tmpl : $('#header-tmpl').html(),
 
 		initialize : function initialize() {
-
 			this.render();
-
 		},
 
 		render : function render() {

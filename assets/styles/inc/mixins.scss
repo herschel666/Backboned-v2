@@ -1,0 +1,17 @@
+@mixin transition ($args) {
+	-webkit-transition: $args;
+	-moz-transition: $args;
+	-ms-transition: $args;
+	transition: $args;
+	}
+
+@mixin transform ($args) {
+	-webkit-transform: $args;
+	-moz-transform: $args;
+	-ms-transform: $args;
+	transform: $args;
+	}
+
+@function em($px, $ref: 16) {
+	@return ($px/$ref) * 1em;
+	}

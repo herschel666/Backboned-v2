@@ -5,10 +5,10 @@ require.config({
 	baseUrl : BB.template_url + '/assets/scripts',
 
 	paths : {
-		'jquery' : 'vendor/jquery-1.9.1.min',
-		'underscore' : 'vendor/underscore-1.4.4.min',
-		'backbone' : 'vendor/backbone-1.0.0.min',
-		'mustache' : 'vendor/mustache-0.7.2.min'
+		'jquery' : '../vendor/jquery/dist/jquery',
+		'underscore' : '../vendor/underscore/underscore',
+		'backbone' : '../vendor/backbone/backbone',
+		'mustache' : '../vendor/mustache/mustache'
 	},
 
 	urlArgs : (function () {
