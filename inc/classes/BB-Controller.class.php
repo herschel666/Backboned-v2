@@ -324,7 +324,7 @@ class Backboned {
 	protected function __get_js_scripts() {
 
 		$str = '<script src="' . get_bloginfo('template_url');
-		$str .= '/assets/scripts/vendor/require-2.1.5.min.js"';
+		$str .= '/assets/vendor/requirejs/require.js"';
 		$str .= ' data-main="' . get_bloginfo('template_url');
 		$str .= '/assets/scripts/config"';
 		$str .= '></script>';
