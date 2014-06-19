@@ -40,11 +40,13 @@ function bb_set_body_class() {
 
 	$inst = new Backboned();
 
-	if ( $inst->request_type() != 'standard' ) {
-		return;
+	if ( $inst->request_type() == 'standard' ) {
+		echo ' class="request-pending"';
 	}
 
-	echo ' class="request-pending"';
+	if ( $inst->request_type() == 'search_engine' ) {
+		echo ' class="content-ready"';
+	}
 
 }
 
