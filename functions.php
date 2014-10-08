@@ -19,6 +19,13 @@ remove_action('wp_head', 'rsd_link');
 remove_action('wp_head', 'start_post_rel_link', 10, 0);
 remove_action('wp_head', 'adjacent_posts_rel_link_wp_head', 10, 0);
 
+
+add_filter('the_date', 'format_the_date');
+function format_the_date($unixtimestamp) {
+    return strftime(get_option('date_format'), $unixtimestamp);
+}
+
+
 function bb_remove_annoying_stuff() {
 	wp_deregister_script('l10n');
 }

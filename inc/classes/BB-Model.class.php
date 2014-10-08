@@ -190,6 +190,12 @@ class WP_Model {
 
 		$ret = array();
 
+		// Comments are closed,
+		// do not show the form
+		if ( !comments_open() ) {
+			return $ret;
+		}
+
 		if ( !$id ) {
 			return $ret;
 		}
@@ -241,7 +247,7 @@ class WP_Model {
 				'post_title' => $post->post_title,
 				'permalink' => get_permalink($post->ID),
 				'post_content' => apply_filters('the_content', wpautop($post->post_content)),
-				'nice_date' => date(get_option('date_format'), strtotime($post->post_date)),
+				'nice_date' => apply_filters('the_date', strtotime($post->post_date)),
 				'comment_count' => $post->comment_count
 			);
 
@@ -269,7 +275,7 @@ class WP_Model {
 			'ID' => $post->ID,
 			'post_title' => $post->post_title,
 			'post_content' => apply_filters('the_content', wpautop($post->post_content)),
-			'nice_date' => date(get_option('date_format'), strtotime($post->post_date)),
+			'nice_date' => apply_filters('the_date', strtotime($post->post_date)),
 			'post_author' => $post->post_author
 		);
 
@@ -295,7 +301,7 @@ class WP_Model {
 		foreach ( $comments as $comment ) {
 			$result[] = array(
 				'comment_ID' => $comment->comment_ID,
-				'nice_date' => date(get_option('date_format'), strtotime($comment->comment_date)),
+				'nice_date' => apply_filters('the_date', strtotime($comment->comment_date)),
 				'comment_author' => $comment->comment_author,
 				'comment_author_url' => $comment->comment_author_url == 'http://'
 					? ''
@@ -351,13 +357,13 @@ class WP_Model {
 		}
 
 		$post->post_content = wpautop($post->post_content);
-		$post->nice_date = date(get_option('date_format'), strtotime($post->post_date));
+		$post->nice_date = apply_filters('the_date', strtotime($post->post_date));
 
 		return array(
 			'ID' => $post->ID,
 			'post_title' => $post->post_title,
 			'post_content' => apply_filters('the_content', wpautop($post->post_content)),
-			'nice_date' => date(get_option('date_format'), strtotime($post->post_date)),
+			'nice_date' => apply_filters('the_date', strtotime($post->post_date)),
 			'post_author' => $post->post_author
 		);
 
