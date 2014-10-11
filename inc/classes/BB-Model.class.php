@@ -5,14 +5,43 @@
 **/
 class WP_Model {
 
+
 	protected $user;
+
+	protected $supported_errors = array();
 
 	public function __construct() {
 
 		global $current_user;
+
 		get_currentuserinfo();
+
+		$this->_init_error_messages();
+
 		$this->user = $current_user;
 
+	}
+
+	public function date_format($unixtimestamp) {
+    return strftime(get_option('date_format'), $unixtimestamp);
+	}
+
+	/**
+	 * Initialize error messages
+	 *
+	 * Maybe we would want this to be internationalized too.
+	 *
+	 * @return null
+	 */
+	protected function _init_error_messages() {
+		$errors[404]['title'] = '404 Not Found';
+		$errors[404]['message'] = 'The page you’re looking for doesn’t exist.';
+		$errors[403]['title'] = '403 Forbidden';
+		$errors[403]['message'] = 'You don’t have authorized access to view this document.';
+
+		$this->supported_errors = $errors;
+
+		return null;
 	}
 
 	/*
@@ -333,7 +362,7 @@ class WP_Model {
 		foreach ( wp_get_object_terms($id, 'category') as $category ) {
 			$categories[] = array(
 				'term_id' => $category->term_id,
-				'slug' => $category->slug,
+				'slug' => get_option( 'category_base' ) . '/category/'. $category->slug,
 				'name' => $category->name
 			);
 		}
@@ -389,18 +418,22 @@ class WP_Model {
 
 	}
 
-	/*
-	 * Content of the 404-page
+	/**
+	 * Content of the error view
 	 *
 	 * @return array
-	**/
-	protected function __get_404() {
+   **/
+	protected function __get_error($code) {
+		return $this->supported_errors[$code];
+	}
 
-		return array(
-			'title' => 'Error 404',
-			'message' => 'The page you\'re looking for doesn\'t exist.'
-		);
-
+	/**
+	 * Get list of supported errors messages
+	 *
+	 * @return array of HTTP status codes numbers
+	 */
+	public function get_supported_errors() {
+		return array_keys($this->supported_errors);
 	}
 
 }

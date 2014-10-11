@@ -2,134 +2,73 @@
 
 require_once('inc/classes/BB-Controller.class.php');
 
-/*
+$bb_controller = null;
+
+/**
+ * Give a chance to configure outside of the theme
+ * your own theme preferences. They can be about date
+ * formats, or anything else.
+ **/
+if ( ! function_exists( 'bb_after_setup_theme' ) ) {
+
+	/**
+	 * Override safely this function to put your own
+	 * preferences.
+	 *
+	 * For example, if you want i18n date format you can
+	 * do like this.
+	 *
+	 * NOTE: make sure you have php5-intl module
+	 *       installed on your app server.
+	 **/
+	function bb_after_setup_theme() {
+		update_option('date_format', '%A %e %B %Y');
+	}
+
+}
+
+add_action( 'after_setup_theme', 'bb_after_setup_theme');
+
+/**
+ * Give a chance to configure outside of the theme
+ * your own overload preferences.
+ **/
+if ( ! function_exists( 'bb_init' ) ) {
+
+	function bb_init() {
+		//foo
+	}
+
+}
+
+add_action( 'init', 'bb_init', 11);
+
+/**
  * Set the content width based on the theme's design and stylesheet.
-**/
+ **/
 if ( ! isset( $content_width ) ) {
 	$content_width = 570;
 }
 
-/*
- * Removing annoying stuff from the HTML-head
-**/
-
-remove_action('wp_head', 'wp_generator');
-remove_action('wp_head', 'wlwmanifest_link');
-remove_action('wp_head', 'rsd_link');
-remove_action('wp_head', 'start_post_rel_link', 10, 0);
-remove_action('wp_head', 'adjacent_posts_rel_link_wp_head', 10, 0);
-
-
-add_filter('the_date', 'format_the_date');
-function format_the_date($unixtimestamp) {
-    return strftime(get_option('date_format'), $unixtimestamp);
+function wp_bb_init( &$WP_Instance ) {
+	$GLOBALS['bb_controller'] = new BackbonedController($WP_Instance);
 }
 
+add_action( 'wp', 'wp_bb_init', 1 );
 
-function bb_remove_annoying_stuff() {
-	wp_deregister_script('l10n');
-}
-add_action('init', 'bb_remove_annoying_stuff');
-
-/*
- * Setting the body-class
-**/
-function bb_body_class() {
-	do_action('bb_body_class');
-}
-
-/*
- * If it's not a search-engine-crawler visiting the site,
- * the right body-class is set to hide the empty
- * content-element.
-**/
-function bb_set_body_class() {
-
-	$inst = new Backboned();
-
-	if ( $inst->request_type() == 'standard' ) {
-		echo ' class="request-pending"';
-	}
-
-	if ( $inst->request_type() == 'search_engine' ) {
-		echo ' class="content-ready"';
-	}
-
-}
-
-add_action('bb_body_class', 'bb_set_body_class', 1);
-
-/*
+/**
  * Registering hooks
  *
  * Content-Hook
-**/
+ **/
 function bb_content($type) {
 	do_action('bb_content', $type);
 }
 
 function bb_get_content($type) {
 
-	$inst = new Backboned();
-	$inst->content($type);
+	$GLOBALS['bb_controller']->content($type);
 
 }
 
 add_action('bb_content', 'bb_get_content', 5);
-
-/*
- * JS-Variables-Hook
-**/
-function bb_get_js_variables() {
-
-	$inst = new Backboned();
-
-	if ( $inst->request_type() != 'standard' ) {
-		return;
-	}
-
-	$js_variables = $inst->get('js_variables');
-
-	echo '<script>BB = ' . json_encode($js_variables) . ';</script>';
-
-}
-
-add_action('wp_head', 'bb_get_js_variables', 5);
-
-/*
- * JS-Scripts-Hook
-**/
-function bb_get_js_scripts() {
-
-	$inst = new Backboned();
-
-	if ( $inst->request_type() != 'standard' ) {
-		return;
-	}
-
-	$scripts = $inst->get('js_scripts');
-
-	echo $scripts;
-
-}
-
-add_action('wp_footer', 'bb_get_js_scripts', 5);
-
-/*
- * Writing the templates to the DOM
-**/
-function bb_get_partials() {
-
-	$inst = new Backboned();
-
-	if ( $inst->request_type() != 'standard' ) {
-		return;
-	}
-
-	$partials = $inst->get('partials');
-
-	echo $partials;
-
-}
-
-add_action('wp_footer', 'bb_get_partials', 5);
