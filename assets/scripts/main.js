@@ -29,7 +29,7 @@ require([
 	**/
 	$(document.body).on('click', 'a', function (evnt) {
 
-		if ( !('pushState' in window.history) || /^\/(wp-login|wp-admin)/.test(this.pathname) ) {
+		if ( !('pushState' in window.history) || /\/(wp-login|wp-admin)/.test(this.pathname) ) {
 			return true;
 		}
 
