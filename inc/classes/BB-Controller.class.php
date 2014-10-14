@@ -41,7 +41,7 @@ class BackbonedController {
 			return $GLOBALS['bb_controller'];
 		}
 
-
+		header('X-UA-Compatible: content="IE=edge,chrome=1');
 		header('X-Request-type: '.$this->request_type());
 
 		// We can support child theme views folder
