@@ -41,7 +41,12 @@ class BackbonedController {
 			return $GLOBALS['bb_controller'];
 		}
 
-		header('X-UA-Compatible: content="IE=edge,chrome=1');
+		// Note: The X-UA-Compatible HTTP header is specific to IE.
+		//       In terms of markup recommendations, it is said better to
+		//       send an HTTP header than using a meta http-equiv tag.
+		//       http://www.validatethis.co.uk/news/fix-bad-value-x-ua-compatible-once-and-for-all/
+		header('X-UA-Compatible: IE=edge,chrome=1');
+
 		header('X-Request-type: '.$this->request_type());
 
 		// We can support child theme views folder

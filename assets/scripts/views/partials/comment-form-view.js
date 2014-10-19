@@ -4,10 +4,31 @@ define([
 	'mustache'
 ], function (app, Backbone, Mustache) {
 
+	function makeAlert(message) {
+		return $('<div class="alert alert-danger fade in" role="alert"></div>').text(message);
+	}
+
+	/**
+	 * If only WordPress would listen to request preference while
+	 * returning error state, we wouldn’t need to parse the HTML
+	 * response body like that.
+	 **/
+	function getXhrBodyResponseText(xhr) {
+		var rt = xhr.responseText,
+				rtMessageRegEx = new RegExp('(<body.*>|<\/body>)', 'img');
+		if(!!rt) {
+			str = rt.split(rtMessageRegEx)[2].trim();
+
+			return $(str);
+		}
+	}
+
 	/*
 	 * View for the comment-form.
 	**/
 	return Backbone.View.extend({
+
+		SOMETHING_WENT_WRONG: 'Sorry, something went wrong. Please try again or contact the administrator',
 
 		tmpl : $('#commentform-tmpl').html(),
 
@@ -119,24 +140,39 @@ define([
 		 * Asynchronously sending the form data to the wordpress system.
 		**/
 		submitForm : function submitForm(formData, formElem) {
+			var proxy    = $.proxy(this.handleFormResponse, this, formElem),
+					endpoint = 'wp-comments-post.php'; // Make this configurable #TODO
 
-			$.post('wp-comments-post.php', formData, $.proxy(this.handleFormResponse, this, formElem));
+			var promise = $.post(endpoint, formData, proxy, 'json');
 
+			promise.error(this.handleFormErrors);
 		},
 
-		/*
+		handleFormErrors : function handleFormErrors(xhr, xhrStatusText) {
+			console.log('handleFormErrors', arguments);
+
+			if ( xhr.status > 399 ) {
+				$('#comment-form form .alert').remove();
+				// Take xhr body response text, if WP install is already supports other
+				// languages than english, the message from HTML error page will be in
+				// that language already.
+				makeAlert(getXhrBodyResponseText(xhr).text()).prependTo('#comment-form form');
+			}
+		},
+
+		/**
 		 * Error message or - if nothing went wrong - resetting the form
 		 * and append the new comment.
-		**/
-		handleFormResponse : function handleFormResponse(formElem, resp) {
+		 **/
+		handleFormResponse : function handleFormResponse(formElem, responseText, xhrStatusText, xhr) {
+			var resp = $.parseJSON(responseText);
 
 			if ( !resp.hasOwnProperty('comments') ) {
-				alert('Sorry, something went wrong. Please try again or contact the administrator.');
+				makeAlert(this.SOMETHING_WENT_WRONG).prependTo('#comment-form form');
 			}
 
 			formElem.reset();
 			app.trigger('UI.newCommentAdded', resp.comments);
-
 		}
 
 	});
