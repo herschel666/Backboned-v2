@@ -45,7 +45,10 @@ class BackbonedController {
 		//       In terms of markup recommendations, it is said better to
 		//       send an HTTP header than using a meta http-equiv tag.
 		//       http://www.validatethis.co.uk/news/fix-bad-value-x-ua-compatible-once-and-for-all/
-		header('X-UA-Compatible: IE=edge,chrome=1');
+
+		if ( $this->request_type() === 'standard' && get_option('html_type') === 'text/html' ) {
+			header('X-UA-Compatible: IE=edge,chrome=1');
+		}
 
 		header('X-Request-type: '.$this->request_type());
 
@@ -82,9 +85,11 @@ class BackbonedController {
 
 		$classes = (array) $classNames;
 
-		if ( $this->request_type() == 'standard' ) {
-			$classes[] = 'request-pending';
-		} elseif ( $this->request_type() == 'search_engine' ) {
+		if ( isset($_GET['_escaped_fragment_']) ) {
+			$classes[] = 'request-direct-link';
+		}
+
+		if ( $this->request_type() == 'search_engine' ) {
 			$classes[] = 'content-ready';
 		}
 
@@ -150,7 +155,7 @@ class BackbonedController {
 	 * @return void
 	 */
 	private function _initMustache() {
-		$mustache_options['cache'] = $this->root . '/cache/mustache';
+		$mustache_options['cache'] = '/tmp/m'; //$this->root . '/cache/mustache';
 		$mustache_options['cache_file_mode'] = 0666;
 		$mustache_options['loader'] = new Mustache_Loader_FilesystemLoader($this->root . '/views');
 		$mustache_options['partials_loader'] = new Mustache_Loader_FilesystemLoader($this->root . '/views/partials');
@@ -158,6 +163,7 @@ class BackbonedController {
 			return htmlspecialchars($value, ENT_COMPAT, 'UTF-8');
 		};
 		$mustache_options['charset'] = 'utf-8';
+		$mustache_options['helpers'] = array('foo' => function() { return (isset($_GET['_escaped_fragment_']))? true : false; });
 
 		$this->mustache = new Mustache_Engine($mustache_options);
 	}
@@ -237,11 +243,11 @@ class BackbonedController {
 
 	}
 
-	/*
+	/**
 	 * Loop pagination
 	 *
 	 * @return array
-	**/
+	 **/
 	protected function __get_pagelinks() {
 
 		$paged = get_query_var('paged')
@@ -273,17 +279,24 @@ class BackbonedController {
 	 * The Error view
 	 **/
 	protected function __generate_error($http_code=404) {
+
+		$request_type = $this->request_type();
+
+		/**
+		 * If it happens that this view has been
+		 * called directly for the first time, just
+		 * send the Mustache. JavaScript will take
+		 * care to serve the content
+		 */
+		if ( $request_type == 'standard' ) {
+			echo file_get_contents($this->root . '/views/layout.mustache');
+			return;
+		}
+
 		$code = 404;
 
 		if ( in_array($http_code, $this->wp_model->get_supported_errors()) ) {
 			$code = (int) $http_code;
-		}
-
-		$request_type = $this->request_type();
-
-		if ( $request_type == 'standard' ) {
-			echo file_get_contents($this->root . '/views/layout.mustache');
-			return;
 		}
 
 		// Make sure we have each equivalent codes
@@ -301,13 +314,21 @@ class BackbonedController {
 
 		}
 
+		/**
+		 * from this point on, the request URL should have 
+		 * ?_escaped_fragment_=foo and therefore be a 
+		 * $request_type === 'search_engine'
+		 **/
+
 		$content = array_merge($this->get('frame'), $error);
 
-		// Change views/404.mustache for generic-er error document #TODO
-		$layout = $this->mustache->loadTemplate('404');
-		// If we wanted i18n on PHP side, that’s where we’d inject it #TODO
-		echo $layout->render($content);
+		// Change views/error.mustache for generic-er error document #TODO
 
+		$layout = $this->mustache->loadTemplate('error');
+
+		// If we wanted i18n on PHP side, that’s where we’d inject it #TODO
+
+		echo $layout->render($content);
 	}
 
 	/**
@@ -317,6 +338,12 @@ class BackbonedController {
 
 		$request_type = $this->request_type();
 
+		/**
+		 * If it happens that this view has been
+		 * called directly for the first time, just
+		 * send the Mustache. JavaScript will take
+		 * care to serve the content
+		 */
 		if ( $request_type == 'standard' ) {
 			echo file_get_contents($this->root . '/views/layout.mustache');
 			return;
@@ -337,10 +364,17 @@ class BackbonedController {
 
 		}
 
+		/**
+		 * from this point on, the request URL should have 
+		 * ?_escaped_fragment_=foo and therefore be a 
+		 * $request_type === 'search_engine'
+		 **/
+
 		$content = array_merge($this->get('frame'), $pagelinks);
 		$content['posts'] = $posts;
 
-		$layout = $this->mustache->loadTemplate('loop');
+		$layout = $this->mustache->loadTemplate('posts');
+
 		// If we wanted i18n on PHP side, that’s where we’d inject it #TODO
 		echo $layout->render($content);
 
@@ -353,6 +387,12 @@ class BackbonedController {
 
 		$request_type = $this->request_type();
 
+		/**
+		 * If it happens that this view has been
+		 * called directly for the first time, just
+		 * send the Mustache. JavaScript will take
+		 * care to serve the content
+		 */
 		if ( $request_type == 'standard' ) {
 			echo file_get_contents($this->root . '/views/layout.mustache');
 			return;
@@ -379,10 +419,16 @@ class BackbonedController {
 
 		}
 
+		/**
+		 * from this point on, the request URL should have 
+		 * ?_escaped_fragment_=foo and therefore be a 
+		 * $request_type === 'search_engine'
+		 **/
+
 		$content = array_merge($content, $this->get('frame'));
 		$content['comments'] = $comments;
 
-		$layout = $this->mustache->loadTemplate('single');
+		$layout = $this->mustache->loadTemplate('layout');
 		// If we wanted i18n on PHP side, that’s where we’d inject it #TODO
 		echo $layout->render($content);
 
@@ -395,6 +441,12 @@ class BackbonedController {
 
 		$request_type = $this->request_type();
 
+		/**
+		 * If it happens that this view has been
+		 * called directly for the first time, just
+		 * send the Mustache. JavaScript will take
+		 * care to serve the content
+		 */
 		if ( $request_type == 'standard' ) {
 			echo file_get_contents($this->root . '/views/layout.mustache');
 			return;
@@ -421,14 +473,15 @@ class BackbonedController {
 		}
 
 		/**
-		 * from this point on, the request URL should have ?_escaped_fragment_
-		 * and therefore be a $request_type === 'search_engine'
-		 */
+		 * from this point on, the request URL should have 
+		 * ?_escaped_fragment_=foo and therefore be a 
+		 * $request_type === 'search_engine'
+		 **/
 
 		$content = array_merge($content, $this->get('frame'), $commentform);
 		$content['comments'] = $comments;
 
-		$layout = $this->mustache->loadTemplate('page');
+		$layout = $this->mustache->loadTemplate('layout');
 		// If we wanted i18n on PHP side, that’s where we’d inject it #TODO
 		echo $layout->render($content);
 
@@ -482,9 +535,12 @@ class BackbonedController {
 	 * Create Template-Strings for the DOM
 	 *
 	 * @return string
-	**/
+ 	 **/
 	protected function __get_partials() {
 
+		/*
+		 * Let’s use the same names
+		 *
 		$templates = array(
 			'loop' => 'posts',
 			'page' => 'page',
@@ -498,16 +554,29 @@ class BackbonedController {
 			'aside' => 'main-aside',
 			'footer' => 'main-footer'
 		);
+		*/
+
+		$templates = array();
 		$str = '';
+		$path = $this->root . '/views/partials';
+
+		if ($handle = opendir($path)) {
+			while (false !== ($entry = readdir($handle))) {
+				if ($entry != "." && $entry != "..") {
+					$id = strstr($entry,'.mustache', true);
+					$templates[$id] = $path.'/'.$entry;
+				}
+			}
+			closedir($handle);
+		}
 
 		foreach ( $templates as $id => $path ) {
-			$str .= '<script type="text/x-template" id="' . $id . '-tmpl">';
-			$str .= str_replace(array("\n", "\t", "\r"), '', file_get_contents($this->root . '/views/partials/' . $path . '.mustache'));
+			$str .= '<script type="text/x-template" id="' . $id . '__tmpl">';
+			$str .= str_replace(array(PHP_EOL, "\t", "\r", "  "), '', file_get_contents($path));
 			$str .= '</script>';
 		}
 
 		return $str;
-
 	}
 
 }

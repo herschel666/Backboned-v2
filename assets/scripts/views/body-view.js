@@ -31,7 +31,6 @@ define(['app'], function (app) {
 
 			this
 				.$el
-				.removeClass('request-pending')
 				.addClass('content-inserted');
 
 			_.delay(function (that) {
@@ -43,6 +42,7 @@ define(['app'], function (app) {
 			_.delay(function (that) {
 				that
 					.$el
+ 					.removeClass('request-pending')
 					.removeClass('content-inserted');
 			}, 900, this);
 
