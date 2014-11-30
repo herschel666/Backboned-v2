@@ -5,14 +5,43 @@
 **/
 class WP_Model {
 
+
 	protected $user;
+
+	protected $supported_errors = array();
 
 	public function __construct() {
 
 		global $current_user;
+
 		get_currentuserinfo();
+
+		$this->_init_error_messages();
+
 		$this->user = $current_user;
 
+	}
+
+	public function date_format($unixtimestamp) {
+    return strftime(get_option('date_format'), $unixtimestamp);
+	}
+
+	/**
+	 * Initialize error messages
+	 *
+	 * Maybe we would want this to be internationalized too.
+	 *
+	 * @return null
+	 */
+	protected function _init_error_messages() {
+		$errors[404]['title'] = '404 Not Found';
+		$errors[404]['message'] = 'The page you’re looking for doesn’t exist.';
+		$errors[403]['title'] = '403 Forbidden';
+		$errors[403]['message'] = 'You don’t have authorized access to view this document.';
+
+		$this->supported_errors = $errors;
+
+		return null;
 	}
 
 	/*
@@ -51,6 +80,59 @@ class WP_Model {
 	**/
 	protected function __get_main_nav() {
 
+		// See also those related functions
+		// to get menus. They had useful notes
+		// on how WP handle sorting.
+		//
+		//   - wp_nav_menu()
+		//   - wp_get_nav_menu_items()
+		//   - get_nav_menu_locations()
+		//   - wp_get_nav_menu_object()
+
+		// Assuming we have ONLY ONE menu. Otherwise it breaks.
+		$menus = wp_get_nav_menus();
+		$menu = $menus[0];
+		$menu_items = wp_get_nav_menu_items( $menu->term_id );
+
+	  // ==== /Copy-pasting code is bad, m-kay... =====
+		// This is only to sort menu like WordPress is doing it.
+		// Sorry about that.
+		// See around line 336 of wp-inclucdes/nav-menu-template.php
+		$sorted_menu_items = $menu_items_with_children = array();
+		foreach ( (array) $menu_items as $menu_item ) {
+			$sorted_menu_items[ $menu_item->menu_order ] = $menu_item;
+			if ( $menu_item->menu_item_parent )
+				$menu_items_with_children[ $menu_item->menu_item_parent ] = true;
+		}
+		if ( $menu_items_with_children ) {
+			foreach ( $sorted_menu_items as &$menu_item ) {
+				if ( isset( $menu_items_with_children[ $menu_item->ID ] ) )
+					$menu_item->classes[] = 'menu-item-has-children';
+			}
+		}
+	  // ==== /Copy-pasting code is bad, m-kay... =====
+
+		//var_dump($sorted_menu_items);
+
+		$out = array();
+
+
+		foreach($sorted_menu_items as $m) {
+			$e = array();
+			//$e['tmp'] = $m;
+			if(is_category($m->object_id)) {
+				$e['current'] = true;
+			}
+			$e['title'] = __($m->title);
+			$e['slug'] = $m->url;
+			$e['id'] = $m->ID;
+			$out[] = $e;
+		}
+		//var_dump($out);
+
+		return $out;
+
+
 		$pages = get_pages('parent=0');
 		$page_array = array();
 		$count = 0;
@@ -86,6 +168,7 @@ class WP_Model {
 	protected function __get_categories() {
 
 		$categories = get_categories('hierarchical=0');
+
 		$category_array = array();
 
 		if ( empty($categories) ) {
@@ -190,6 +273,12 @@ class WP_Model {
 
 		$ret = array();
 
+		// Comments are closed,
+		// do not show the form
+		if ( !comments_open() ) {
+			return $ret;
+		}
+
 		if ( !$id ) {
 			return $ret;
 		}
@@ -231,6 +320,11 @@ class WP_Model {
 			$query .= '&monthnum=' . date('m', $archiveDate);
 		}
 
+		// So theme can work with Xili and multilingual site
+		if(class_exists('xili_language')) {
+			$query .= '&'.QUETAG.'='.xili_curlang();
+		}
+
 		$posts = query_posts($query);
 		$result = array();
 
@@ -241,7 +335,7 @@ class WP_Model {
 				'post_title' => $post->post_title,
 				'permalink' => get_permalink($post->ID),
 				'post_content' => apply_filters('the_content', wpautop($post->post_content)),
-				'nice_date' => date(get_option('date_format'), strtotime($post->post_date)),
+				'nice_date' => apply_filters('the_date', strtotime($post->post_date)),
 				'comment_count' => $post->comment_count
 			);
 
@@ -269,7 +363,7 @@ class WP_Model {
 			'ID' => $post->ID,
 			'post_title' => $post->post_title,
 			'post_content' => apply_filters('the_content', wpautop($post->post_content)),
-			'nice_date' => date(get_option('date_format'), strtotime($post->post_date)),
+			'nice_date' => apply_filters('the_date', strtotime($post->post_date)),
 			'post_author' => $post->post_author
 		);
 
@@ -295,7 +389,7 @@ class WP_Model {
 		foreach ( $comments as $comment ) {
 			$result[] = array(
 				'comment_ID' => $comment->comment_ID,
-				'nice_date' => date(get_option('date_format'), strtotime($comment->comment_date)),
+				'nice_date' => apply_filters('the_date', strtotime($comment->comment_date)),
 				'comment_author' => $comment->comment_author,
 				'comment_author_url' => $comment->comment_author_url == 'http://'
 					? ''
@@ -327,7 +421,7 @@ class WP_Model {
 		foreach ( wp_get_object_terms($id, 'category') as $category ) {
 			$categories[] = array(
 				'term_id' => $category->term_id,
-				'slug' => $category->slug,
+				'slug' => get_option( 'category_base' ) . '/category/'. $category->slug,
 				'name' => $category->name
 			);
 		}
@@ -351,13 +445,13 @@ class WP_Model {
 		}
 
 		$post->post_content = wpautop($post->post_content);
-		$post->nice_date = date(get_option('date_format'), strtotime($post->post_date));
+		$post->nice_date = apply_filters('the_date', strtotime($post->post_date));
 
 		return array(
 			'ID' => $post->ID,
 			'post_title' => $post->post_title,
 			'post_content' => apply_filters('the_content', wpautop($post->post_content)),
-			'nice_date' => date(get_option('date_format'), strtotime($post->post_date)),
+			'nice_date' => apply_filters('the_date', strtotime($post->post_date)),
 			'post_author' => $post->post_author
 		);
 
@@ -383,18 +477,22 @@ class WP_Model {
 
 	}
 
-	/*
-	 * Content of the 404-page
+	/**
+	 * Content of the error view
 	 *
 	 * @return array
-	**/
-	protected function __get_404() {
+   **/
+	protected function __get_error($code) {
+		return $this->supported_errors[$code];
+	}
 
-		return array(
-			'title' => 'Error 404',
-			'message' => 'The page you\'re looking for doesn\'t exist.'
-		);
-
+	/**
+	 * Get list of supported errors messages
+	 *
+	 * @return array of HTTP status codes numbers
+	 */
+	public function get_supported_errors() {
+		return array_keys($this->supported_errors);
 	}
 
 }

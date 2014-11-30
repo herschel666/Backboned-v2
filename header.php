@@ -6,19 +6,15 @@
 <!--[if !IE]><!--> <html class="no-js modern" <?php language_attributes(); ?>> <!--<![endif]-->
 <head>
 	<meta charset="<?php bloginfo('charset'); ?>">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-
 	<!-- make sure google et al. opts in to the hashbang-party -->
 	<meta name="fragment" content="!">
-
 	<base href="<?php bloginfo('url'); ?>/">
 	<meta name="viewport" content="width=device-width">
 	<link rel="stylesheet" media="all" href="<?php bloginfo('stylesheet_url'); ?>">
 	<title><?php wp_title( ' | ', true, 'right' ); ?><?php bloginfo('name'); ?></title>
 	<link rel="profile" href="http://gmpg.org/xfn/11">
 	<link rel="pingback" href="<?php bloginfo('pingback_url'); ?>">
-
 	<?php wp_head(); ?>
 </head>
-<body<?php bb_body_class(); ?>>
+<body <?php body_class(); ?>>
 <?php endif; ?>

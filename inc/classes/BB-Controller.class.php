@@ -9,7 +9,7 @@ Mustache_Autoloader::register();
 /*
  * Backboned Controller
 **/
-class Backboned {
+class BackbonedController {
 
 	/**
 	 * @var string
@@ -21,22 +21,151 @@ class Backboned {
 	 */
 	protected $wp_model;
 
-	public function __construct() {
+	/**
+	 * BackbonedController constructor
+	 *
+	 * There should be only one instance of this object. The
+	 * constructor takes care to add filters it needs to generate the
+	 * pages and handle the Request Response cycle.
+	 *
+	 * Ideally, we should refactor toward Symfony2 http_kernel and specialize
+	 * exclusively for the theme.
+	 *
+	 * http://symfony.com/doc/current/components/http_kernel/introduction.html
+	 *
+	 * @param [type] $WP_Instance [description]
+	 */
+	public function __construct(&$WP_Instance) {
 
-		$this->root = dirname(dirname(dirname(__FILE__)));
+		if ( isset($GLOBALS['bb_controller']) && $GLOBALS['bb_controller'] instanceof BackbonedController ) {
+			return $GLOBALS['bb_controller'];
+		}
+
+		// Note: The X-UA-Compatible HTTP header is specific to IE.
+		//       In terms of markup recommendations, it is said better to
+		//       send an HTTP header than using a meta http-equiv tag.
+		//       http://www.validatethis.co.uk/news/fix-bad-value-x-ua-compatible-once-and-for-all/
+
+		if ( $this->request_type() === 'standard' && get_option('html_type') === 'text/html' ) {
+			header('X-UA-Compatible: IE=edge,chrome=1');
+		}
+
+		header('X-Request-type: '.$this->request_type());
+
+		// We can support child theme views folder
+		$this->root = get_stylesheet_directory();
+
 		$this->wp_model = new WP_Model();
 
-		$this->mustache = new Mustache_Engine(array(
-			'cache' => $this->root . '/cache/mustache',
-			'cache_file_mode' => 0666,
-			'loader' => new Mustache_Loader_FilesystemLoader($this->root . '/views'),
-			'partials_loader' => new Mustache_Loader_FilesystemLoader($this->root . '/views/partials'),
-			'escape' => function($value) {
-				return htmlspecialchars($value, ENT_COMPAT, 'UTF-8');
-			},
-			'charset' => 'utf-8'
-		));
+		$this->_initMustache();
 
+		add_filter( 'body_class', array( $this, 'body_class' ) );
+
+		add_filter( 'the_date', array( $this->wp_model, 'date_format' ) );
+
+		add_action( 'init', array( $this, 'init_deregister_unused_scripts' ), 9 );
+
+		add_action( 'wp_head', array( $this, 'wp_head_cleanup' ), 9 );
+
+		add_action( 'wp_footer', array( $this, 'wp_footer_scripts_echo' ), 5 );
+
+		add_action( 'wp_footer', array( $this, 'wp_footer_partials_echo'), 5 );
+
+		add_action( 'wp_head', array( $this, 'wp_head_js_vars_echo' ), 5 );
+
+		return $this;
+	}
+
+	/**
+	 * If it’s not a search-engine-crawler visiting the site,
+	 * the right body-class is set to hide the empty
+	 * content-element.
+	 **/
+	public function body_class($classNames) {
+
+		$classes = (array) $classNames;
+
+		if ( isset($_GET['_escaped_fragment_']) ) {
+			$classes[] = 'request-direct-link';
+		}
+
+		if ( $this->request_type() == 'search_engine' ) {
+			$classes[] = 'content-ready';
+		}
+
+		return $classes;
+	}
+
+	public function init_deregister_unused_scripts() {
+		wp_deregister_script('l10n');
+	}
+
+  /**
+   * Add our own JavaScript bootstrap hook
+   **/
+	public function wp_footer_scripts_echo() {
+
+		if ( $this->request_type() != 'standard' ) {
+			return;
+		}
+
+		echo $this->get('js_scripts');
+	}
+
+	/**
+	 * Writing the templates to the DOM
+	 **/
+	function wp_footer_partials_echo() {
+
+		if ( $this->request_type() != 'standard' ) {
+			return;
+		}
+
+		echo $this->get('partials');
+	}
+
+	/**
+	 * JS-Variables-Hook
+	 **/
+	function wp_head_js_vars_echo() {
+
+		if ( $this->request_type() != 'standard' ) {
+			return;
+		}
+
+		$js_variables = $this->get('js_variables');
+
+		echo '<script>var BB = ' . json_encode($js_variables) . ';</script>';
+	}
+
+	/**
+	 * Removing annoying stuff from the HTML-head
+	 **/
+	public function wp_head_cleanup() {
+		remove_action('wp_head', 'wp_generator');
+		remove_action('wp_head', 'wlwmanifest_link');
+		remove_action('wp_head', 'rsd_link');
+		remove_action('wp_head', 'start_post_rel_link', 9, 0);
+		remove_action('wp_head', 'adjacent_posts_rel_link_wp_head', 9, 0);
+	}
+
+	/**
+	 * Initialize Mustache
+	 *
+	 * @return void
+	 */
+	private function _initMustache() {
+		$mustache_options['cache'] = '/tmp/m'; //$this->root . '/cache/mustache';
+		$mustache_options['cache_file_mode'] = 0666;
+		$mustache_options['loader'] = new Mustache_Loader_FilesystemLoader($this->root . '/views');
+		$mustache_options['partials_loader'] = new Mustache_Loader_FilesystemLoader($this->root . '/views/partials');
+		$mustache_options['escape'] = function($value) {
+			return htmlspecialchars($value, ENT_COMPAT, 'UTF-8');
+		};
+		$mustache_options['charset'] = 'utf-8';
+		$mustache_options['helpers'] = array('foo' => function() { return (isset($_GET['_escaped_fragment_']))? true : false; });
+
+		$this->mustache = new Mustache_Engine($mustache_options);
 	}
 
 	/*
@@ -54,23 +183,27 @@ class Backboned {
 
 	}
 
-	/*
+	/**
 	 * Check, wether it's a normal request, an async
 	 * request or an request by a search engine crawler.
 	 *
+	 * Also adds an HTTP response header (X-Request-type: ) so we can traceback.
+	 *
 	 * @return string
-	**/
+	 **/
 	public function request_type() {
 
+		$type = 'standard';
+
 		if ( isset($_GET['_escaped_fragment_']) ) {
-			return 'search_engine';
+			$type = 'search_engine';
 		}
 
 		if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ) {
-			return 'async';
+			$type = 'async';
 		}
 
-		return 'standard';
+		return $type;
 
 	}
 
@@ -83,7 +216,7 @@ class Backboned {
 	public function content($type = 'loop') {
 
 		if ( is_404() ) {
-			return $this->__generate_404();
+			return $this->__generate_error(404);
 		}
 
 		return $this->{'__generate_' . $type}();
@@ -110,11 +243,11 @@ class Backboned {
 
 	}
 
-	/*
+	/**
 	 * Loop pagination
 	 *
 	 * @return array
-	**/
+	 **/
 	protected function __get_pagelinks() {
 
 		$paged = get_query_var('paged')
@@ -142,19 +275,33 @@ class Backboned {
 
 	}
 
-	/*
-	 * The Error page
-	**/
-	protected function __generate_404() {
+	/**
+	 * The Error view
+	 **/
+	protected function __generate_error($http_code=404) {
 
 		$request_type = $this->request_type();
 
+		/**
+		 * If it happens that this view has been
+		 * called directly for the first time, just
+		 * send the Mustache. JavaScript will take
+		 * care to serve the content
+		 */
 		if ( $request_type == 'standard' ) {
 			echo file_get_contents($this->root . '/views/layout.mustache');
 			return;
 		}
 
-		$error = $this->wp_model->get('404');
+		$code = 404;
+
+		if ( in_array($http_code, $this->wp_model->get_supported_errors()) ) {
+			$code = (int) $http_code;
+		}
+
+		// Make sure we have each equivalent codes
+		// in there too.
+		$error = $this->wp_model->get('error', $code);
 
 		if ( $request_type == 'async' ) {
 
@@ -167,20 +314,36 @@ class Backboned {
 
 		}
 
+		/**
+		 * from this point on, the request URL should have 
+		 * ?_escaped_fragment_=foo and therefore be a 
+		 * $request_type === 'search_engine'
+		 **/
+
 		$content = array_merge($this->get('frame'), $error);
 
-		$layout = $this->mustache->loadTemplate('404');
-		echo $layout->render($content);
+		// Change views/error.mustache for generic-er error document #TODO
 
+		$layout = $this->mustache->loadTemplate('error');
+
+		// If we wanted i18n on PHP side, that’s where we’d inject it #TODO
+
+		echo $layout->render($content);
 	}
 
-	/*
+	/**
 	 * Output for the loop due to request type
-	**/
+	 **/
 	protected function __generate_loop() {
 
 		$request_type = $this->request_type();
 
+		/**
+		 * If it happens that this view has been
+		 * called directly for the first time, just
+		 * send the Mustache. JavaScript will take
+		 * care to serve the content
+		 */
 		if ( $request_type == 'standard' ) {
 			echo file_get_contents($this->root . '/views/layout.mustache');
 			return;
@@ -201,10 +364,18 @@ class Backboned {
 
 		}
 
+		/**
+		 * from this point on, the request URL should have 
+		 * ?_escaped_fragment_=foo and therefore be a 
+		 * $request_type === 'search_engine'
+		 **/
+
 		$content = array_merge($this->get('frame'), $pagelinks);
 		$content['posts'] = $posts;
 
-		$layout = $this->mustache->loadTemplate('loop');
+		$layout = $this->mustache->loadTemplate('posts');
+
+		// If we wanted i18n on PHP side, that’s where we’d inject it #TODO
 		echo $layout->render($content);
 
 	}
@@ -216,6 +387,12 @@ class Backboned {
 
 		$request_type = $this->request_type();
 
+		/**
+		 * If it happens that this view has been
+		 * called directly for the first time, just
+		 * send the Mustache. JavaScript will take
+		 * care to serve the content
+		 */
 		if ( $request_type == 'standard' ) {
 			echo file_get_contents($this->root . '/views/layout.mustache');
 			return;
@@ -242,10 +419,17 @@ class Backboned {
 
 		}
 
+		/**
+		 * from this point on, the request URL should have 
+		 * ?_escaped_fragment_=foo and therefore be a 
+		 * $request_type === 'search_engine'
+		 **/
+
 		$content = array_merge($content, $this->get('frame'));
 		$content['comments'] = $comments;
 
-		$layout = $this->mustache->loadTemplate('single');
+		$layout = $this->mustache->loadTemplate('layout');
+		// If we wanted i18n on PHP side, that’s where we’d inject it #TODO
 		echo $layout->render($content);
 
 	}
@@ -257,6 +441,12 @@ class Backboned {
 
 		$request_type = $this->request_type();
 
+		/**
+		 * If it happens that this view has been
+		 * called directly for the first time, just
+		 * send the Mustache. JavaScript will take
+		 * care to serve the content
+		 */
 		if ( $request_type == 'standard' ) {
 			echo file_get_contents($this->root . '/views/layout.mustache');
 			return;
@@ -282,10 +472,17 @@ class Backboned {
 
 		}
 
+		/**
+		 * from this point on, the request URL should have 
+		 * ?_escaped_fragment_=foo and therefore be a 
+		 * $request_type === 'search_engine'
+		 **/
+
 		$content = array_merge($content, $this->get('frame'), $commentform);
 		$content['comments'] = $comments;
 
-		$layout = $this->mustache->loadTemplate('page');
+		$layout = $this->mustache->loadTemplate('layout');
+		// If we wanted i18n on PHP side, that’s where we’d inject it #TODO
 		echo $layout->render($content);
 
 	}
@@ -298,9 +495,9 @@ class Backboned {
 	protected function __get_js_variables() {
 
 		$variables = array(
-			'dev_mode' => $_SERVER['HTTP_HOST'] === 'wp.dev',
+			'dev_mode' => (bool) preg_match("/localhost/", $_SERVER['HTTP_HOST']),
 			'base_url' => get_option('home'),
-			'template_url' => get_bloginfo('template_url'),
+			'template_url' => get_stylesheet_directory_uri(),
 			'logged_in' => is_user_logged_in(),
 			'site_header' => $this->wp_model->get('site_header'),
 			'main_nav' => $this->wp_model->get('main_nav'),
@@ -311,6 +508,11 @@ class Backboned {
 			'footer' => $this->wp_model->get('footer'),
 			'post_count' => $this->wp_model->get('post_count')
 		);
+
+		// So theme can work with Xili and multilingual site
+		if(class_exists('xili_language')) {
+			$variables['lang'] = xili_curlang();
+		}
 
 		return $variables;
 
@@ -323,9 +525,10 @@ class Backboned {
 	**/
 	protected function __get_js_scripts() {
 
-		$str = '<script src="' . get_bloginfo('template_url');
+		// get_stylesheet_directory_uri() will also work with child themes
+		$str = '<script src="' . get_stylesheet_directory_uri();
 		$str .= '/assets/vendor/requirejs/require.js"';
-		$str .= ' data-main="' . get_bloginfo('template_url');
+		$str .= ' data-main="' . get_stylesheet_directory_uri();
 		$str .= '/assets/scripts/config"';
 		$str .= '></script>';
 
@@ -337,9 +540,12 @@ class Backboned {
 	 * Create Template-Strings for the DOM
 	 *
 	 * @return string
-	**/
+ 	 **/
 	protected function __get_partials() {
 
+		/*
+		 * Let’s use the same names
+		 *
 		$templates = array(
 			'loop' => 'posts',
 			'page' => 'page',
@@ -353,16 +559,29 @@ class Backboned {
 			'aside' => 'main-aside',
 			'footer' => 'main-footer'
 		);
+		*/
+
+		$templates = array();
 		$str = '';
+		$path = $this->root . '/views/partials';
+
+		if ($handle = opendir($path)) {
+			while (false !== ($entry = readdir($handle))) {
+				if ($entry != "." && $entry != "..") {
+					$id = strstr($entry,'.mustache', true);
+					$templates[$id] = $path.'/'.$entry;
+				}
+			}
+			closedir($handle);
+		}
 
 		foreach ( $templates as $id => $path ) {
-			$str .= '<script type="text/x-template" id="' . $id . '-tmpl">';
-			$str .= str_replace(array("\n", "\t", "\r"), '', file_get_contents($this->root . '/views/partials/' . $path . '.mustache'));
+			$str .= '<script type="text/x-template" id="' . $id . '__tmpl">';
+			$str .= str_replace(array(PHP_EOL, "\t", "\r", "  "), '', file_get_contents($path));
 			$str .= '</script>';
 		}
 
 		return $str;
-
 	}
 
 }
