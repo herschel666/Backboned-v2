@@ -80,6 +80,59 @@ class WP_Model {
 	**/
 	protected function __get_main_nav() {
 
+		// See also those related functions
+		// to get menus. They had useful notes
+		// on how WP handle sorting.
+		//
+		//   - wp_nav_menu()
+		//   - wp_get_nav_menu_items()
+		//   - get_nav_menu_locations()
+		//   - wp_get_nav_menu_object()
+
+		// Assuming we have ONLY ONE menu. Otherwise it breaks.
+		$menus = wp_get_nav_menus();
+		$menu = $menus[0];
+		$menu_items = wp_get_nav_menu_items( $menu->term_id );
+
+	  // ==== /Copy-pasting code is bad, m-kay... =====
+		// This is only to sort menu like WordPress is doing it.
+		// Sorry about that.
+		// See around line 336 of wp-inclucdes/nav-menu-template.php
+		$sorted_menu_items = $menu_items_with_children = array();
+		foreach ( (array) $menu_items as $menu_item ) {
+			$sorted_menu_items[ $menu_item->menu_order ] = $menu_item;
+			if ( $menu_item->menu_item_parent )
+				$menu_items_with_children[ $menu_item->menu_item_parent ] = true;
+		}
+		if ( $menu_items_with_children ) {
+			foreach ( $sorted_menu_items as &$menu_item ) {
+				if ( isset( $menu_items_with_children[ $menu_item->ID ] ) )
+					$menu_item->classes[] = 'menu-item-has-children';
+			}
+		}
+	  // ==== /Copy-pasting code is bad, m-kay... =====
+
+		//var_dump($sorted_menu_items);
+
+		$out = array();
+
+
+		foreach($sorted_menu_items as $m) {
+			$e = array();
+			//$e['tmp'] = $m;
+			if(is_category($m->object_id)) {
+				$e['current'] = true;
+			}
+			$e['title'] = __($m->title);
+			$e['slug'] = $m->url;
+			$e['id'] = $m->ID;
+			$out[] = $e;
+		}
+		//var_dump($out);
+
+		return $out;
+
+
 		$pages = get_pages('parent=0');
 		$page_array = array();
 		$count = 0;

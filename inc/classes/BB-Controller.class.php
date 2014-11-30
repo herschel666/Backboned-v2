@@ -509,6 +509,11 @@ class BackbonedController {
 			'post_count' => $this->wp_model->get('post_count')
 		);
 
+		// So theme can work with Xili and multilingual site
+		if(class_exists('xili_language')) {
+			$variables['lang'] = xili_curlang();
+		}
+
 		return $variables;
 
 	}
