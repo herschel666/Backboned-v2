@@ -115,6 +115,7 @@ class WP_Model {
 	protected function __get_categories() {
 
 		$categories = get_categories('hierarchical=0');
+
 		$category_array = array();
 
 		if ( empty($categories) ) {
@@ -264,6 +265,11 @@ class WP_Model {
 		if ( $archiveDate ) {
 			$query .= '&year=' . date('Y', $archiveDate);
 			$query .= '&monthnum=' . date('m', $archiveDate);
+		}
+
+		// So theme can work with Xili and multilingual site
+		if(class_exists('xili_language')) {
+			$query .= '&'.QUETAG.'='.xili_curlang();
 		}
 
 		$posts = query_posts($query);
